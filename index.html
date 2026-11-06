@@ -299,6 +299,167 @@ document.getElementById('copyBtn').addEventListener('click',async()=>{
  try{await navigator.clipboard.writeText('NILO3');notify('Code NILO3 copié !');}
  catch(e){window.prompt('Copiez le code promo :','NILO3');}
 });
-</script>
+// CONNEXION DES MATCHS API-FOOTBALL
+
+const matchesContainer = document.getElementById('matchesContainer');
+const matchesStatus = document.getElementById('matchesStatus');
+const countryFilter = document.getElementById('countryFilter');
+const leagueFilter = document.getElementById('leagueFilter');
+const matchDate = document.getElementById('matchDate');
+
+let allMatches = [];
+
+function escapeMatchText(value) {
+ return String(value ?? '').replace(/[&<>"']/g, char => ({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ }[char]));
+}
+
+function displayMatches() {
+ const country = countryFilter.value;
+ const league = leagueFilter.value;
+
+ const filtered = allMatches.filter(match =>
+  (!country || match.league.country === country) &&
+  (!league || String(match.league.id) === league)
+ );
+
+ matchesContainer.innerHTML = '';
+
+ if (!filtered.length) {
+  matchesContainer.innerHTML =
+   '<div class="match-empty">Aucun match trouvé.</div>';
+  return;
+ }
+
+ const countries = {};
+
+ filtered.forEach(match => {
+  const countryName = match.league.country || 'Autres pays';
+  const leagueName = match.league.name || 'Championnat';
+
+  if (!countries[countryName]) countries[countryName] = {};
+  if (!countries[countryName][leagueName])
+   countries[countryName][leagueName] = [];
+
+  countries[countryName][leagueName].push(match);
+ });
+
+ Object.keys(countries).sort().forEach(countryName => {
+  const countryTitle = document.createElement('div');
+  countryTitle.className = 'country-title';
+  countryTitle.textContent = '🌍 ' + countryName;
+  matchesContainer.appendChild(countryTitle);
+
+  Object.keys(countries[countryName]).sort().forEach(leagueName => {
+   const title = document.createElement('div');
+   title.className = 'league-title';
+   title.textContent = '🏆 ' + leagueName;
+   matchesContainer.appendChild(title);
+
+   countries[countryName][leagueName].forEach(match => {
+    const home = match.teams.home;
+    const away = match.teams.away;
+    const status = match.fixture.status;
+    const goals = match.goals;
+
+    const time = new Date(match.fixture.date).toLocaleTimeString(
+     'fr-FR',
+     {hour:'2-digit',minute:'2-digit',timeZone:'Africa/Abidjan'}
+    );
+
+    const score = goals.home !== null && goals.away !== null
+     ? goals.home + ' - ' + goals.away
+     : 'VS';
+
+    const card = document.createElement('div');
+    card.className = 'match-card';
+
+    card.innerHTML = `
+     <div class="match-meta">
+      <span>${escapeMatchText(time)}</span>
+      <span>${escapeMatchText(status.long || status.short)}</span>
+     </div>
+     <div class="match-teams">
+      <div class="match-team">
+       <img src="${escapeMatchText(home.logo)}" alt="">
+       <span>${escapeMatchText(home.name)}</span>
+      </div>
+      <div class="match-score">${escapeMatchText(score)}</div>
+      <div class="match-team">
+       <img src="${escapeMatchText(away.logo)}" alt="">
+       <span>${escapeMatchText(away.name)}</span>
+      </div>
+     </div>
+    `;
+
+    matchesContainer.appendChild(card);
+   });
+  });
+ });
+}
+
+async function loadFootballMatches() {
+ matchesStatus.textContent = 'Chargement des matchs...';
+
+ try {
+  const response = await fetch('/.netlify/functions/fixtures');
+  if (!response.ok) throw new Error('Erreur API');
+
+  const data = await response.json();
+
+  if (data.errors && Object.keys(data.errors).length) {
+   throw new Error('Erreur API-Football');
+  }
+
+  allMatches = data.response || [];
+
+  countryFilter.innerHTML = '<option value="">Tous les pays</option>';
+  leagueFilter.innerHTML = '<option value="">Tous les championnats</option>';
+
+  const countries = [...new Set(
+   allMatches.map(m => m.league.country).filter(Boolean)
+  )].sort();
+
+  countries.forEach(country => {
+   countryFilter.add(new Option(country, country));
+  });
+
+  const leagues = [...new Map(
+   allMatches.map(m => [
+    m.league.id,
+    {id:m.league.id, name:m.league.name, country:m.league.country}
+   ])
+  ).values()].sort((a,b) => a.name.localeCompare(b.name));
+
+  leagues.forEach(league => {
+   leagueFilter.add(new Option(
+    league.name + ' · ' + league.country,
+    league.id
+   ));
+  });
+
+  matchesStatus.textContent =
+   allMatches.length + ' matchs trouvés dans les championnats disponibles.';
+
+  displayMatches();
+
+ } catch (error) {
+  matchesStatus.textContent = 'Impossible de charger les matchs.';
+  matchesContainer.innerHTML =
+   '<div class="match-empty">Erreur de connexion. Réessaie plus tard.</div>';
+ }
+}
+
+countryFilter.addEventListener('change', displayMatches);
+leagueFilter.addEventListener('change', displayMatches);
+
+if (matchDate) {
+ matchDate.value = new Date().toLocaleDateString('en-CA', {
+  timeZone:'Africa/Abidjan'
+ });
+}
+
+loadFootballMatches();</script>
 </body>
 </html>
