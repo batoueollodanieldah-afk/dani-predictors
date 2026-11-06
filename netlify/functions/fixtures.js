@@ -9,8 +9,12 @@ exports.handler = async function () {
   }
 
   try {
-    const date = new Date().toISOString().slice(0, 10);
+    const requestedDate = event.queryStringParameters?.date;
+const today = new Date().toISOString().slice(0, 10);
 
+const date = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '')
+  ? requestedDate
+  : today;
     const response = await fetch(
       `https://v3.football.api-sports.io/fixtures?date=${date}`,
       {
