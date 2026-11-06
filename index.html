@@ -403,7 +403,8 @@ async function loadFootballMatches() {
  matchesStatus.textContent = 'Chargement des matchs...';
 
  try {
-  const response = await fetch('/.netlify/functions/fixtures');
+const selectedDate = matchDate.value;
+const response = await fetch('/.netlify/functions/fixtures?date=' + selectedDate);
   if (!response.ok) throw new Error('Erreur API');
 
   const data = await response.json();
