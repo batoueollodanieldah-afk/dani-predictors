@@ -1,4 +1,4 @@
-exports.handler = async function () {
+exports.handler = async function (event) {
   const API_KEY = process.env.API_FOOTBALL_KEY;
 
   if (!API_KEY) {
