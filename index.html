@@ -454,7 +454,7 @@ const response = await fetch('/.netlify/functions/fixtures?date=' + selectedDate
 
 countryFilter.addEventListener('change', displayMatches);
 leagueFilter.addEventListener('change', displayMatches);
-
+matchDate.addEventListener('change', loadFootballMatches);
 if (matchDate) {
  matchDate.value = new Date().toLocaleDateString('en-CA', {
   timeZone:'Africa/Abidjan'
