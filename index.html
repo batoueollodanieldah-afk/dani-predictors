@@ -163,6 +163,27 @@ button,a{font:inherit}a{color:inherit;text-decoration:none}
   <section class="view" id="football">
    <div class="content">
     <div class="back-row"><button class="back" onclick="showView('home')" aria-label="Retour">‹</button><h1 class="page-title">Football</h1></div>
+    <div class="section-title">
+ <h2>⚽ Matchs du jour</h2>
+</div>
+
+<div class="matches-toolbar">
+ <input type="date" id="matchDate">
+ <select id="countryFilter">
+  <option value="">Tous les pays</option>
+ </select>
+ <select id="leagueFilter">
+  <option value="">Tous les championnats</option>
+ </select>
+</div>
+
+<div class="matches-status" id="matchesStatus">
+ Chargement des matchs...
+</div>
+
+<div id="matchesContainer">
+ <div class="match-empty">Les matchs seront affichés ici.</div>
+</div>
     <div class="subcategory-list">
      <button class="subcategory" onclick="notify('Les pronostics seront publiés après vérification des matchs et des données.')"><span class="sub-icon" style="color:#55d9a3">♢</span><span><span class="sub-label">Pronos sûrs</span><span class="sub-note">Sélections prudentes, sans garantie de résultat</span></span></button>
      <button class="subcategory" onclick="notify('La rubrique meilleur coupon total sera alimentée après vérification.')"><span class="sub-icon" style="color:#e4b83e">▣</span><span><span class="sub-label">Meilleur coupon total</span><span class="sub-note">Combinaisons et analyses argumentées</span></span></button>
