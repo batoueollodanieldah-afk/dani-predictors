@@ -9,8 +9,10 @@ exports.handler = async function () {
   }
 
   try {
+    const date = new Date().toISOString().slice(0, 10);
+
     const response = await fetch(
-      "https://v3.football.api-sports.io/fixtures?next=10",
+      `https://v3.football.api-sports.io/fixtures?date=${date}`,
       {
         headers: {
           "x-apisports-key": API_KEY
