@@ -400,58 +400,77 @@ function displayMatches() {
 }
 
 async function loadFootballMatches() {
- matchesStatus.textContent = 'Chargement des matchs...';
+  matchesStatus.textContent = 'Chargement des matchs...';
+  matchesContainer.innerHTML = '';
 
- try {
-const selectedDate = matchDate.value;
-const response = await fetch('/.netlify/functions/fixtures?date=' + selectedDate);
-  if (!response.ok) throw new Error('Erreur API');
+  try {
+    const selectedDate = matchDate.value;
+    const response = await fetch(
+      '/.netlify/functions/fixtures?date=' + selectedDate
+    );
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (data.errors && Object.keys(data.errors).length) {
-   throw new Error('Erreur API-Football');
+    if (data.errors && Object.keys(data.errors).length > 0) {
+      if (data.errors.plan) {
+        matchesStatus.textContent = 'Date non disponible';
+        matchesContainer.innerHTML =
+          '<div class="match-empty">📅 Cette date n’est pas accessible avec le forfait API actuel. Choisis une date autorisée.</div>';
+        return;
+      }
+
+      throw new Error('Erreur API-Football');
+    }
+
+    if (!response.ok) {
+      throw new Error('Erreur serveur');
+    }
+
+    allMatches = data.response || [];
+
+    countryFilter.innerHTML = '<option value="">Tous les pays</option>';
+    leagueFilter.innerHTML = '<option value="">Tous les championnats</option>';
+
+    const countries = [...new Set(
+      allMatches.map(m => m.league.country).filter(Boolean)
+    )].sort();
+
+    countries.forEach(country => {
+      countryFilter.add(new Option(country, country));
+    });
+
+    const leagues = [...new Map(
+      allMatches.map(m => [
+        m.league.id,
+        {id:m.league.id, name:m.league.name, country:m.league.country}
+      ])
+    ).values()].sort((a,b) => a.name.localeCompare(b.name));
+
+    leagues.forEach(league => {
+      leagueFilter.add(new Option(
+        league.name + ' · ' + league.country,
+        league.id
+      ));
+    });
+
+    if (allMatches.length === 0) {
+      matchesStatus.textContent = 'Aucun match disponible.';
+      matchesContainer.innerHTML =
+        '<div class="match-empty">Aucun match trouvé pour cette date.</div>';
+      return;
+    }
+
+    matchesStatus.textContent =
+      allMatches.length + ' matchs trouvés dans les championnats disponibles.';
+
+    displayMatches();
+
+  } catch (error) {
+    matchesStatus.textContent = 'Problème de chargement';
+    matchesContainer.innerHTML =
+      '<div class="match-empty">Impossible de récupérer les matchs. Vérifie ta connexion et réessaie.</div>';
   }
-
-  allMatches = data.response || [];
-
-  countryFilter.innerHTML = '<option value="">Tous les pays</option>';
-  leagueFilter.innerHTML = '<option value="">Tous les championnats</option>';
-
-  const countries = [...new Set(
-   allMatches.map(m => m.league.country).filter(Boolean)
-  )].sort();
-
-  countries.forEach(country => {
-   countryFilter.add(new Option(country, country));
-  });
-
-  const leagues = [...new Map(
-   allMatches.map(m => [
-    m.league.id,
-    {id:m.league.id, name:m.league.name, country:m.league.country}
-   ])
-  ).values()].sort((a,b) => a.name.localeCompare(b.name));
-
-  leagues.forEach(league => {
-   leagueFilter.add(new Option(
-    league.name + ' · ' + league.country,
-    league.id
-   ));
-  });
-
-  matchesStatus.textContent =
-   allMatches.length + ' matchs trouvés dans les championnats disponibles.';
-
-  displayMatches();
-
- } catch (error) {
-  matchesStatus.textContent = 'Impossible de charger les matchs.';
-  matchesContainer.innerHTML =
-   '<div class="match-empty">Erreur de connexion. Réessaie plus tard.</div>';
- }
 }
-
 countryFilter.addEventListener('change', displayMatches);
 leagueFilter.addEventListener('change', displayMatches);
 matchDate.addEventListener('change', loadFootballMatches);
