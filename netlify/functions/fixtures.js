@@ -35,7 +35,6 @@ exports.handler = async function (event) {
       };
     }
 
-    // Championnats sélectionnés
     const leagues = [
       "premier league",
       "championship",
@@ -72,18 +71,39 @@ exports.handler = async function (event) {
 
     const matches = (data.response || [])
       .filter(match => {
-        const leagueName = (match.league.name || "").toLowerCase();
-        const status = match.fixture.status.short;
-        const matchTime = match.fixture.timestamp * 1000;
+        const leagueName =
+          (match.league.name || "").toLowerCase();
+
+        const home =
+          (match.teams.home.name || "").toLowerCase();
+
+        const away =
+          (match.teams.away.name || "").toLowerCase();
+
+        const excluded = [
+          "u19", "u20", "u21", "u23",
+          "youth", "junior", "reserve",
+          "women", "feminine", "feminin"
+        ];
+
+        const text = `${leagueName} ${home} ${away}`;
+
+        const isExcluded = excluded.some(word =>
+          text.includes(word)
+        );
 
         const selectedLeague = leagues.some(name =>
           leagueName.includes(name)
         );
 
-        const upcoming = ["NS", "TBD"].includes(status) &&
+        const status = match.fixture.status.short;
+        const matchTime = match.fixture.timestamp * 1000;
+
+        const upcoming =
+          ["NS", "TBD"].includes(status) &&
           matchTime > now;
 
-        return selectedLeague && upcoming;
+        return selectedLeague && upcoming && !isExcluded;
       })
       .map(match => ({
         id: match.fixture.id,
