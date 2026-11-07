@@ -27,75 +27,136 @@ exports.handler = async function (event) {
 
     const data = await response.json();
 
-    if (!response.ok || (data.errors &&
-        Object.keys(data.errors).length > 0)) {
+    if (!response.ok || (
+      data.errors && Object.keys(data.errors).length > 0
+    )) {
       return {
         statusCode: response.status || 400,
         body: JSON.stringify(data)
       };
     }
 
-    const leagues = [
-      "premier league",
-      "championship",
-      "league one",
-      "la liga",
-      "segunda division",
-      "bundesliga",
-      "2. bundesliga",
-      "serie a",
-      "serie b",
-      "ligue 1",
-      "ligue 2",
-      "primeira liga",
-      "liga portugal",
-      "eredivisie",
-      "belgian pro league",
-      "jupiler pro league",
-      "super lig",
-      "süper lig",
-      "mls",
-      "major league soccer",
-      "brasileirao",
-      "serie a brazil",
-      "primera division",
-      "argentine primera division",
-      "champions league",
-      "europa league",
-      "conference league",
+    // Normalisation des noms
+    const normalize = value =>
+      (value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9 ]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    // Championnats principaux autorisés :
+    // format : pays|nom exact du championnat
+    const allowedLeagues = [
+      // Europe
+      "england|premier league",
+      "spain|la liga",
+      "italy|serie a",
+      "germany|bundesliga",
+      "france|ligue 1",
+      "netherlands|eredivisie",
+      "portugal|liga portugal",
+      "portugal|primeira liga",
+      "belgium|jupiler pro league",
+      "turkey|super lig",
+      "scotland|premiership",
+
+      // Amérique
+      "usa|major league soccer",
+      "brazil|serie a",
+      "argentina|liga profesional argentina",
+      "argentina|primera division",
+
+      // Asie et Océanie
+      "japan|j1 league",
+      "australia|a league",
+
+      // Afrique
+      "cote d ivoire|ligue 1",
+      "burkina faso|ligue 1",
+      "senegal|ligue 1",
+      "cameroon|elite one",
+      "algeria|ligue 1",
+      "tunisia|ligue 1",
+      "dr congo|ligue 1",
+      "morocco|botola pro",
+      "egypt|premier league",
+      "south africa|premier soccer league",
+      "ghana|premier league",
+      "nigeria|npfl",
+      "kenya|fkf premier league",
+      "uganda|premier league",
+      "mali|premiere division",
+      "tanzania|ligi kuu bara",
+      "zambia|super league"
+    ];
+
+    // Grandes compétitions internationales
+    const internationalLeagues = [
+      "uefa champions league",
+      "uefa europa league",
+      "uefa conference league",
+      "caf champions league",
+      "caf confederation cup",
       "africa cup of nations",
-      "caf champions league"
+      "fifa world cup",
+      "world cup"
+    ];
+
+    const excludedWords = [
+      "women",
+      "woman",
+      "frauen",
+      "feminine",
+      "feminin",
+      "ladies",
+      "girls",
+      "youth",
+      "junior",
+      "academy",
+      "reserve",
+      "reserves",
+      "u17",
+      "u18",
+      "u19",
+      "u20",
+      "u21",
+      "u23"
     ];
 
     const now = Date.now();
 
     const matches = (data.response || [])
       .filter(match => {
-        const leagueName =
-          (match.league.name || "").toLowerCase();
+        const leagueName = normalize(match.league.name);
+        const country = normalize(match.league.country);
+        const home = normalize(match.teams.home.name);
+        const away = normalize(match.teams.away.name);
 
-        const home =
-          (match.teams.home.name || "").toLowerCase();
+        const fullText =
+          `${leagueName} ${home} ${away}`;
 
-        const away =
-          (match.teams.away.name || "").toLowerCase();
-
-        const excluded = [
-          "u19", "u20", "u21", "u23",
-          "youth", "junior", "reserve",
-          "women", "feminine", "feminin"
-        ];
-
-        const text = `${leagueName} ${home} ${away}`;
-
-        const isExcluded = excluded.some(word =>
-          text.includes(word)
+        // Exclusion des catégories non souhaitées
+        const excluded = excludedWords.some(word =>
+          fullText.includes(normalize(word))
         );
 
-        const selectedLeague = leagues.some(name =>
-          leagueName.includes(name)
-        );
+        // Exclusion des équipes réserves et féminines
+        const reserveTeam = team =>
+          /(?:^|\s)(?:ii|iii|iv|b|w|women|u17|u18|u19|u20|u21|u23)$/.test(team);
 
+        const excludedTeam =
+          reserveTeam(home) || reserveTeam(away);
+
+        // Vérification pays + championnat exact
+        const leagueKey = `${country}|${leagueName}`;
+
+        const selectedLeague =
+          allowedLeagues.includes(leagueKey) ||
+          internationalLeagues.includes(leagueName);
+
+        // Matchs à venir uniquement
         const status = match.fixture.status.short;
         const matchTime = match.fixture.timestamp * 1000;
 
@@ -103,7 +164,12 @@ exports.handler = async function (event) {
           ["NS", "TBD"].includes(status) &&
           matchTime > now;
 
-        return selectedLeague && upcoming && !isExcluded;
+        return (
+          selectedLeague &&
+          upcoming &&
+          !excluded &&
+          !excludedTeam
+        );
       })
       .map(match => ({
         id: match.fixture.id,
