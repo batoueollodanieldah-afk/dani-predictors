@@ -6,9 +6,7 @@ exports.handler = async function (event) {
   if (!API_KEY || !SUPABASE_URL || !SUPABASE_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: "Configuration des clés API incomplète"
-      })
+      body: JSON.stringify({ error: "Configuration incomplète" })
     };
   }
 
@@ -16,43 +14,90 @@ exports.handler = async function (event) {
     const requestedDate = event.queryStringParameters?.date;
     const today = new Date().toISOString().slice(0, 10);
 
-    const date = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '')
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate || "")
       ? requestedDate
       : today;
 
-    // Récupération des matchs
     const response = await fetch(
       `https://v3.football.api-sports.io/fixtures?date=${date}`,
       {
-        headers: {
-          "x-apisports-key": API_KEY
-        }
+        headers: { "x-apisports-key": API_KEY }
       }
     );
 
     const data = await response.json();
 
-    if (!response.ok || data.errors && Object.keys(data.errors).length) {
+    if (!response.ok || (data.errors &&
+        Object.keys(data.errors).length > 0)) {
       return {
         statusCode: response.status || 400,
         body: JSON.stringify(data)
       };
     }
 
-    // Préparation des matchs pour Supabase
-    const matches = (data.response || []).map(match => ({
-      id: match.fixture.id,
-      home_team: match.teams.home.name,
-      away_team: match.teams.away.name,
-      league: match.league.name,
-      country: match.league.country,
-      match_date: match.fixture.date,
-      status: match.fixture.status.short,
-      home_score: match.goals.home,
-      away_score: match.goals.away
-    }));
+    // Championnats sélectionnés
+    const leagues = [
+      "premier league",
+      "championship",
+      "league one",
+      "la liga",
+      "segunda division",
+      "bundesliga",
+      "2. bundesliga",
+      "serie a",
+      "serie b",
+      "ligue 1",
+      "ligue 2",
+      "primeira liga",
+      "liga portugal",
+      "eredivisie",
+      "belgian pro league",
+      "jupiler pro league",
+      "super lig",
+      "süper lig",
+      "mls",
+      "major league soccer",
+      "brasileirao",
+      "serie a brazil",
+      "primera division",
+      "argentine primera division",
+      "champions league",
+      "europa league",
+      "conference league",
+      "africa cup of nations",
+      "caf champions league"
+    ];
 
-    // Enregistrement par lots de 100 matchs
+    const now = Date.now();
+
+    const matches = (data.response || [])
+      .filter(match => {
+        const leagueName = (match.league.name || "").toLowerCase();
+        const status = match.fixture.status.short;
+        const matchTime = match.fixture.timestamp * 1000;
+
+        const selectedLeague = leagues.some(name =>
+          leagueName.includes(name)
+        );
+
+        const upcoming = ["NS", "TBD"].includes(status) &&
+          matchTime > now;
+
+        return selectedLeague && upcoming;
+      })
+      .map(match => ({
+        id: match.fixture.id,
+        home_team: match.teams.home.name,
+        away_team: match.teams.away.name,
+        league: match.league.name,
+        country: match.league.country,
+        match_date: match.fixture.date,
+        status: match.fixture.status.short,
+        home_score: match.goals.home,
+        away_score: match.goals.away
+      }));
+
+    // Enregistrement dans Supabase
     for (let i = 0; i < matches.length; i += 100) {
       const batch = matches.slice(i, i + 100);
 
@@ -71,8 +116,9 @@ exports.handler = async function (event) {
       );
 
       if (!dbResponse.ok) {
-        const errorText = await dbResponse.text();
-        throw new Error("Erreur Supabase : " + errorText);
+        throw new Error(
+          "Erreur Supabase : " + await dbResponse.text()
+        );
       }
     }
 
@@ -83,7 +129,11 @@ exports.handler = async function (event) {
         "Cache-Control": "public, max-age=300"
       },
       body: JSON.stringify({
-        ...data,
+        get: data.get,
+        parameters: data.parameters,
+        total_matches_received: (data.response || []).length,
+        results: matches.length,
+        response: matches,
         database_sync: {
           success: true,
           saved_matches: matches.length
@@ -94,9 +144,7 @@ exports.handler = async function (event) {
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: error.message
-      })
+      body: JSON.stringify({ error: error.message })
     };
   }
 };
