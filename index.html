@@ -215,341 +215,611 @@ button,a{font:inherit}a{color:inherit;text-decoration:none}
   </nav>  
   <button class="bot-fab" aria-label="Assistant" onclick="notify('Assistant DANI PREDICTORS : bientôt disponible.')">▣</button>  
  </div>  
-</div>  <script>  
-function showView(id,button){  
- document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));  
- const target=document.getElementById(id);  
- if(target) target.classList.add('active');  
-  
- document.querySelectorAll('.bottom-item').forEach(b=>b.classList.remove('active'));  
-  
- if(button){  
-  button.classList.add('active');  
- }else{  
-  const map={home:0,games:1,football:2,vip:3,history:4};  
-  const items=document.querySelectorAll('.bottom-item');  
-  if(map[id]!==undefined) items[map[id]].classList.add('active');  
- }  
-  
- window.scrollTo({top:0,behavior:'smooth'});  
-  
- if(id==='football' && !allMatches.length){  
-  loadFootballMatches();  
- }  
-}  
-  
-let toastTimer;  
-function notify(message){  
- const t=document.getElementById('toast');  
- t.textContent=message;  
- t.style.display='block';  
- clearTimeout(toastTimer);  
- toastTimer=setTimeout(()=>t.style.display='none',2800);  
-}  
-  
-function closePromoWelcome(){  
- const modal=document.getElementById('promoWelcome');  
- if(modal) modal.style.display='none';  
- try{sessionStorage.setItem('daniPromoSeen','1');}catch(e){}  
-}  
-  
-async function copyPartnerCode(){  
- try{  
-  await navigator.clipboard.writeText('NILO3');  
-  notify('Code NILO3 copié !');  
- }catch(e){  
-  window.prompt('Copiez le code promo :','NILO3');  
- }  
-}  
-  
-try{  
- if(sessionStorage.getItem('daniPromoSeen')==='1'){  
-  document.getElementById('promoWelcome').style.display='none';  
- }  
-}catch(e){}  
-  
-document.getElementById('copyBtn').addEventListener('click',copyPartnerCode);  
-  
-// ============================================  
-// DANI PREDICTORS - CONNEXION FOOTBALL  
-// Compatible avec netlify/functions/fixtures.js  
-// ============================================  
-  
-const matchesContainer = document.getElementById('matchesContainer');  
-const matchesStatus = document.getElementById('matchesStatus');  
-const countryFilter = document.getElementById('countryFilter');  
-const leagueFilter = document.getElementById('leagueFilter');  
-const matchDate = document.getElementById('matchDate');  
-  
-let allMatches = [];  
-let loadingMatches = false;  
-let lastLoadedDate = '';  
-  
-function getAbidjanDate(){  
- const parts=new Intl.DateTimeFormat('en-CA',{  
-  timeZone:'Africa/Abidjan',  
-  year:'numeric',  
-  month:'2-digit',  
-  day:'2-digit'  
- }).formatToParts(new Date());  
-  
- const values={};  
- parts.forEach(part=>values[part.type]=part.value);  
-  
- return `${values.year}-${values.month}-${values.day}`;  
-}  
-  
-function escapeMatchText(value){  
- return String(value ?? '').replace(/[&<>"']/g,char=>({  
-  '&':'&amp;',  
-  '<':'&lt;',  
-  '>':'&gt;',  
-  '"':'&quot;',  
-  "'":'&#39;'  
- }[char]));  
-}  
-  
-function translateMatchStatus(status){  
- const labels={  
-  NS:'À venir',  
-  TBD:'À confirmer',  
-  '1H':'Première mi-temps',  
-  HT:'Mi-temps',  
-  '2H':'Deuxième mi-temps',  
-  ET:'Prolongations',  
-  P:'Tirs au but',  
-  FT:'Terminé',  
-  AET:'Terminé après prolongations',  
-  PEN:'Terminé aux tirs au but',  
-  LIVE:'En direct',  
-  SUSP:'Suspendu',  
-  INT:'Interrompu'  
- };  
- return labels[status] || status || 'Statut inconnu';  
-}  
-  
-function displayMatches(){  
- const selectedCountry=countryFilter.value;  
- const selectedLeague=leagueFilter.value;  
-  
- const filtered=allMatches.filter(match=>(  
-  (!selectedCountry || match.country===selectedCountry) &&  
-  (!selectedLeague || String(match.league_id)===selectedLeague)  
- ));  
-  
- matchesContainer.innerHTML='';  
-  
- if(!filtered.length){  
-  matchesContainer.innerHTML='<div class="match-empty">Aucun match trouvé avec ces filtres.</div>';  
-  return;  
- }  
-  
- const grouped={};  
-  
- filtered.forEach(match=>{  
-  const country=match.country || 'Autres pays';  
-  const league=match.league || 'Championnat';  
-  
-  if(!grouped[country]) grouped[country]={};  
-  if(!grouped[country][league]) grouped[country][league]=[];  
-  
-  grouped[country][league].push(match);  
- });  
-  
- Object.keys(grouped).sort().forEach(country=>{  
-  const countryTitle=document.createElement('div');  
-  countryTitle.className='country-title';  
-  countryTitle.textContent='🌍 '+country;  
-  matchesContainer.appendChild(countryTitle);  
-  
-  Object.keys(grouped[country]).sort().forEach(league=>{  
-   const leagueTitle=document.createElement('div');  
-   leagueTitle.className='league-title';  
-   leagueTitle.textContent='🏆 '+league;  
-   matchesContainer.appendChild(leagueTitle);  
-  
-   grouped[country][league]  
-    .sort((a,b)=>new Date(a.match_date)-new Date(b.match_date))  
-    .forEach(match=>{  
-     const time=new Date(match.match_date).toLocaleTimeString('fr-FR',{  
-      hour:'2-digit',  
-      minute:'2-digit',  
-      timeZone:'Africa/Abidjan'  
-     });  
-  
-     const score=match.home_score!==null && match.away_score!==null  
-      ? `${match.home_score} - ${match.away_score}`  
-      : 'VS';  
-  
-     const homeLogo=match.home_logo  
-      ? `<img src="${escapeMatchText(match.home_logo)}" alt="" loading="lazy" onerror="this.style.display='none'">`  
-      : '';  
-  
-     const awayLogo=match.away_logo  
-      ? `<img src="${escapeMatchText(match.away_logo)}" alt="" loading="lazy" onerror="this.style.display='none'">`  
-      : '';  
-  
-     const card=document.createElement('div');  
-     card.className='match-card';  
-  
-     card.innerHTML=`  
-      <div class="match-meta">  
-       <span>🕒 ${escapeMatchText(time)}</span>  
-       <span>${escapeMatchText(translateMatchStatus(match.status))}</span>  
-      </div>  
-      <div class="match-teams">  
-       <div class="match-team">  
-        ${homeLogo}  
-        <span>${escapeMatchText(match.home_team)}</span>  
-       </div>  
-       <div class="match-score">${escapeMatchText(score)}</div>  
-       <div class="match-team">  
-        ${awayLogo}  
-        <span>${escapeMatchText(match.away_team)}</span>  
-       </div>  
-      </div>  
-     `;  
-  
-     matchesContainer.appendChild(card);  
-    });  
-  });  
- });  
-}  
-  
-function useFootballData(data){  
- allMatches=Array.isArray(data.response)?data.response:[];  
-  
- countryFilter.innerHTML='<option value="">Tous les pays</option>';  
- leagueFilter.innerHTML='<option value="">Tous les championnats</option>';  
-  
- const countries=[...new Set(  
-  allMatches.map(match=>match.country).filter(Boolean)  
- )].sort();  
-  
- countries.forEach(country=>{  
-  countryFilter.add(new Option(country,country));  
- });  
-  
- const leagues=[  
-  ...new Map(allMatches.map(match=>[  
-   match.league_id,  
-   {  
-    id:match.league_id,  
-    name:match.league,  
-    country:match.country  
-   }  
-  ])).values()  
- ].filter(league=>league.id!==null && league.id!==undefined)  
-  .sort((a,b)=>String(a.name).localeCompare(String(b.name)));  
-  
- leagues.forEach(league=>{  
-  leagueFilter.add(new Option(  
-   `${league.name} · ${league.country}`,  
-   String(league.id)  
-  ));  
- });  
-  
- if(!allMatches.length){  
-  matchesStatus.textContent='Aucun match sélectionné pour cette date.';  
-  matchesContainer.innerHTML='<div class="match-empty">Aucune rencontre trouvée dans les championnats sélectionnés pour cette date.</div>';  
-  return;  
- }  
-  
- matchesStatus.textContent=  
-  `${allMatches.length} matchs sélectionnés sur ${data.total_matches_received ?? allMatches.length} rencontres reçues.`;  
-  
- if(data.database_sync){  
-  matchesStatus.textContent+=data.database_sync.success  
-   ? ' · Base de données actualisée.'  
-   : ' · Synchronisation de la base à vérifier.';  
- }  
-  
- displayMatches();  
-}  
-  
-async function loadFootballMatches(forceRefresh=false){  
- if(loadingMatches) return;  
-  
- const selectedDate=matchDate.value || getAbidjanDate();  
- const cacheKey='dani_fixtures_'+selectedDate;  
-  
- loadingMatches=true;  
- matchesStatus.textContent='Chargement des matchs...';  
- matchesContainer.innerHTML='<div class="match-empty">⚽ Récupération des rencontres...</div>';  
-  
- try{  
-  // Cache navigateur de 5 minutes pour limiter les appels  
-  if(!forceRefresh){  
-   try{  
-    const saved=localStorage.getItem(cacheKey);  
-    if(saved){  
-     const cached=JSON.parse(saved);  
-     if(  
-      cached.savedAt &&  
-      Date.now()-cached.savedAt<300000 &&  
-      cached.data &&  
-      cached.data.success===true  
-     ){  
-      useFootballData(cached.data);  
-      lastLoadedDate=selectedDate;  
-      return;  
-     }  
-    }  
-   }catch(e){}  
-  }  
-  
-  const response=await fetch(  
-   '/.netlify/functions/fixtures?date='+encodeURIComponent(selectedDate),  
-   {  
-    method:'GET',  
-    headers:{'Accept':'application/json'}  
-   }  
-  );  
-  
-  let data;  
-  try{  
-   data=await response.json();  
-  }catch(e){  
-   throw new Error('Le serveur a renvoyé une réponse illisible.');  
-  }  
-  
-  if(!response.ok || data.success!==true){  
-   const apiError=data.errors?.plan  
-    ? 'Cette date n’est pas accessible avec le forfait API-Football actuel.'  
-    : (data.error || data.message || 'Le service de matchs est momentanément indisponible.');  
-  
-   matchesStatus.textContent='Problème de chargement';  
-   matchesContainer.innerHTML='<div class="match-empty">'+escapeMatchText(apiError)+'</div>';  
-   return;  
-  }  
-  
-  try{  
-   localStorage.setItem(cacheKey,JSON.stringify({  
-    savedAt:Date.now(),  
-    data:data  
-   }));  
-  }catch(e){}  
-  
-  lastLoadedDate=selectedDate;  
-  useFootballData(data);  
-  
- }catch(error){  
-  console.error('Erreur chargement football :',error);  
-  matchesStatus.textContent='Problème de connexion';  
-  matchesContainer.innerHTML='<div class="match-empty">Impossible de récupérer les matchs. Vérifie ta connexion puis réessaie.</div>';  
- }finally{  
-  loadingMatches=false;  
- }  
-}  
-  
-countryFilter.addEventListener('change',displayMatches);  
-leagueFilter.addEventListener('change',displayMatches);  
-  
-matchDate.addEventListener('change',()=>{  
- loadFootballMatches(true);  
-});  
-  
-matchDate.value=getAbidjanDate();  
-loadFootballMatches();  
-</script>  </body>  
+</div>   <script>
+/* =========================================
+   DANI PREDICTORS — SCRIPT PRINCIPAL
+========================================= */
+
+let allMatches = [];
+let loadingMatches = false;
+let lastLoadedDate = '';
+
+const matchesContainer = document.getElementById('matchesContainer');
+const matchesStatus = document.getElementById('matchesStatus');
+const countryFilter = document.getElementById('countryFilter');
+const leagueFilter = document.getElementById('leagueFilter');
+const matchDate = document.getElementById('matchDate');
+
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+function showView(id, button) {
+    document.querySelectorAll('.view').forEach(view => {
+        view.classList.remove('active');
+    });
+
+    const target = document.getElementById(id);
+
+    if (target) {
+        target.classList.add('active');
+    }
+
+    document.querySelectorAll('.bottom-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    if (button) {
+        button.classList.add('active');
+    } else {
+        const map = {
+            home: 0,
+            games: 1,
+            football: 2,
+            vip: 3,
+            history: 4
+        };
+
+        const items = document.querySelectorAll('.bottom-item');
+
+        if (map[id] !== undefined && items[map[id]]) {
+            items[map[id]].classList.add('active');
+        }
+    }
+
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+    if (
+        id === 'football' &&
+        lastLoadedDate !== matchDate.value &&
+        !loadingMatches
+    ) {
+        loadFootballMatches();
+    }
+}
+
+
+/* =========================================
+   NOTIFICATIONS
+========================================= */
+
+let toastTimer;
+
+function notify(message) {
+    const toast = document.getElementById('toast');
+
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.style.display = 'block';
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+        toast.style.display = 'none';
+    }, 2800);
+}
+
+
+/* =========================================
+   FENÊTRE PROMOTIONNELLE
+========================================= */
+
+function closePromoWelcome() {
+    const modal = document.getElementById('promoWelcome');
+
+    if (modal) {
+        modal.style.display = 'none';
+    }
+
+    try {
+        sessionStorage.setItem('daniPromoSeen', '1');
+    } catch (error) {}
+}
+
+try {
+    if (sessionStorage.getItem('daniPromoSeen') === '1') {
+        const modal = document.getElementById('promoWelcome');
+
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+} catch (error) {}
+
+
+/* =========================================
+   COPIE DU CODE PROMO
+========================================= */
+
+async function copyPartnerCode() {
+    try {
+        await navigator.clipboard.writeText('NILO3');
+        notify('Code promo NILO3 copié !');
+    } catch (error) {
+        window.prompt('Copiez le code promo :', 'NILO3');
+    }
+}
+
+const copyBtn = document.getElementById('copyBtn');
+
+if (copyBtn) {
+    copyBtn.addEventListener('click', copyPartnerCode);
+}
+
+
+/* =========================================
+   DATE DE CÔTE D'IVOIRE
+========================================= */
+
+function getAbidjanDate() {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Africa/Abidjan',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).formatToParts(new Date());
+
+    const values = {};
+
+    parts.forEach(part => {
+        values[part.type] = part.value;
+    });
+
+    return `${values.year}-${values.month}-${values.day}`;
+}
+
+
+/* =========================================
+   PROTECTION DU TEXTE
+========================================= */
+
+function escapeMatchText(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    })[character]);
+}
+
+
+/* =========================================
+   TRADUCTION DES STATUTS
+========================================= */
+
+function translateMatchStatus(status) {
+    const labels = {
+        NS: 'À venir',
+        TBD: 'À confirmer',
+        '1H': 'Première mi-temps',
+        HT: 'Mi-temps',
+        '2H': 'Deuxième mi-temps',
+        ET: 'Prolongations',
+        BT: 'Pause prolongations',
+        P: 'Tirs au but',
+        LIVE: 'En direct',
+        FT: 'Terminé',
+        AET: 'Terminé après prolongations',
+        PEN: 'Terminé aux tirs au but',
+        PST: 'Reporté',
+        CANC: 'Annulé',
+        ABD: 'Interrompu',
+        SUSP: 'Suspendu',
+        INT: 'Interrompu'
+    };
+
+    return labels[status] || status || 'Statut inconnu';
+}
+
+
+/* =========================================
+   HEURE DES MATCHS
+========================================= */
+
+function formatMatchTime(dateValue) {
+    if (!dateValue) return '--:--';
+
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) {
+        return '--:--';
+    }
+
+    return date.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Africa/Abidjan'
+    });
+}
+
+
+/* =========================================
+   IDENTIFIANT DU CHAMPIONNAT
+========================================= */
+
+function getLeagueKey(match) {
+    return String(match.league_id ?? match.league ?? '');
+}
+
+
+/* =========================================
+   AFFICHAGE DES MATCHS
+========================================= */
+
+function displayMatches() {
+    if (!matchesContainer) return;
+
+    const selectedCountry = countryFilter.value;
+    const selectedLeague = leagueFilter.value;
+
+    const filtered = allMatches.filter(match => {
+        const countryOK =
+            !selectedCountry || match.country === selectedCountry;
+
+        const leagueOK =
+            !selectedLeague ||
+            getLeagueKey(match) === selectedLeague;
+
+        return countryOK && leagueOK;
+    });
+
+    filtered.sort((a, b) => {
+        return new Date(a.match_date) - new Date(b.match_date);
+    });
+
+    matchesContainer.innerHTML = '';
+
+    if (filtered.length === 0) {
+        matchesContainer.innerHTML = `
+            <div class="match-empty">
+                Aucun match disponible pour cette sélection.
+            </div>
+        `;
+        return;
+    }
+
+    const grouped = {};
+
+    filtered.forEach(match => {
+        const country = match.country || 'Autres pays';
+        const league = match.league || 'Championnat inconnu';
+
+        if (!grouped[country]) {
+            grouped[country] = {};
+        }
+
+        if (!grouped[country][league]) {
+            grouped[country][league] = [];
+        }
+
+        grouped[country][league].push(match);
+    });
+
+    Object.keys(grouped).sort().forEach(country => {
+        const countryTitle = document.createElement('div');
+
+        countryTitle.className = 'country-title';
+        countryTitle.textContent = '🌍 ' + country;
+
+        matchesContainer.appendChild(countryTitle);
+
+        Object.keys(grouped[country]).sort().forEach(league => {
+            const leagueTitle = document.createElement('div');
+
+            leagueTitle.className = 'league-title';
+            leagueTitle.textContent = '🏆 ' + league;
+
+            matchesContainer.appendChild(leagueTitle);
+
+            grouped[country][league].forEach(match => {
+                const homeScore = match.home_score;
+                const awayScore = match.away_score;
+
+                const hasScore =
+                    homeScore !== null &&
+                    homeScore !== undefined &&
+                    awayScore !== null &&
+                    awayScore !== undefined;
+
+                const score = hasScore
+                    ? `${homeScore} - ${awayScore}`
+                    : 'VS';
+
+                const homeLogo = match.home_logo
+                    ? `<img src="${escapeMatchText(match.home_logo)}"
+                        alt=""
+                        loading="lazy"
+                        onerror="this.style.display='none'">`
+                    : '';
+
+                const awayLogo = match.away_logo
+                    ? `<img src="${escapeMatchText(match.away_logo)}"
+                        alt=""
+                        loading="lazy"
+                        onerror="this.style.display='none'">`
+                    : '';
+
+                const card = document.createElement('div');
+
+                card.className = 'match-card';
+
+                card.innerHTML = `
+                    <div class="match-meta">
+                        <span>🕒 ${formatMatchTime(match.match_date)}</span>
+                        <span>${escapeMatchText(
+                            translateMatchStatus(match.status)
+                        )}</span>
+                    </div>
+
+                    <div class="match-teams">
+
+                        <div class="match-team">
+                            ${homeLogo}
+                            <span>${escapeMatchText(match.home_team)}</span>
+                        </div>
+
+                        <div class="match-score">
+                            ${escapeMatchText(score)}
+                        </div>
+
+                        <div class="match-team">
+                            ${awayLogo}
+                            <span>${escapeMatchText(match.away_team)}</span>
+                        </div>
+
+                    </div>
+                `;
+
+                matchesContainer.appendChild(card);
+            });
+        });
+    });
+}
+
+
+/* =========================================
+   FILTRE DES PAYS
+========================================= */
+
+function updateCountryFilter() {
+    const previousCountry = countryFilter.value;
+
+    const countries = [...new Set(
+        allMatches
+            .map(match => match.country)
+            .filter(Boolean)
+    )].sort();
+
+    countryFilter.innerHTML =
+        '<option value="">Tous les pays</option>';
+
+    countries.forEach(country => {
+        countryFilter.add(new Option(country, country));
+    });
+
+    if (countries.includes(previousCountry)) {
+        countryFilter.value = previousCountry;
+    }
+}
+
+
+/* =========================================
+   FILTRE DES CHAMPIONNATS
+========================================= */
+
+function updateLeagueFilter() {
+    const previousLeague = leagueFilter.value;
+    const selectedCountry = countryFilter.value;
+
+    const availableMatches = allMatches.filter(match => {
+        return !selectedCountry ||
+            match.country === selectedCountry;
+    });
+
+    const leagues = [
+        ...new Map(
+            availableMatches.map(match => [
+                getLeagueKey(match),
+                {
+                    id: getLeagueKey(match),
+                    name: match.league,
+                    country: match.country
+                }
+            ])
+        ).values()
+    ].filter(league => league.id);
+
+    leagues.sort((a, b) => {
+        return String(a.name).localeCompare(String(b.name));
+    });
+
+    leagueFilter.innerHTML =
+        '<option value="">Tous les championnats</option>';
+
+    leagues.forEach(league => {
+        const label = league.country
+            ? `${league.name} · ${league.country}`
+            : league.name;
+
+        leagueFilter.add(new Option(label, league.id));
+    });
+
+    if (leagues.some(league => league.id === previousLeague)) {
+        leagueFilter.value = previousLeague;
+    }
+}
+
+
+/* =========================================
+   RÉCEPTION DES DONNÉES FOOTBALL
+========================================= */
+
+function useFootballData(data) {
+    allMatches = Array.isArray(data.response)
+        ? data.response
+        : [];
+
+    updateCountryFilter();
+    updateLeagueFilter();
+    displayMatches();
+
+    if (matchesStatus) {
+        const received =
+            data.total_matches_received ?? allMatches.length;
+
+        let message =
+            `${allMatches.length} matchs retenus sur ${received} reçus`;
+
+        const saved = data.database_sync?.saved_matches;
+
+        if (saved !== undefined) {
+            message += ` · ${saved} enregistrés dans la base`;
+        }
+
+        matchesStatus.textContent = message;
+    }
+}
+
+
+/* =========================================
+   CHARGEMENT DES MATCHS
+========================================= */
+
+async function loadFootballMatches(forceRefresh = false) {
+    if (!matchesContainer || loadingMatches) return;
+
+    const selectedDate = matchDate.value || getAbidjanDate();
+
+    const cacheKey = `dani_matches_${selectedDate}`;
+    const cacheDuration = 5 * 60 * 1000;
+
+    let cachedData = null;
+
+    try {
+        const savedCache = localStorage.getItem(cacheKey);
+
+        if (savedCache) {
+            cachedData = JSON.parse(savedCache);
+
+            const cacheIsValid =
+                Date.now() - cachedData.timestamp < cacheDuration;
+
+            if (
+                cacheIsValid &&
+                !forceRefresh &&
+                cachedData.data?.success === true
+            ) {
+                useFootballData(cachedData.data);
+                lastLoadedDate = selectedDate;
+
+                matchesStatus.textContent += ' · Données en cache';
+
+                return;
+            }
+        }
+    } catch (error) {
+        console.log('Cache indisponible.');
+    }
+
+    loadingMatches = true;
+
+    matchesContainer.innerHTML = `
+        <div class="match-empty">
+            Chargement des matchs...
+        </div>
+    `;
+
+    matchesStatus.textContent =
+        'Connexion aux données football...';
+
+    try {
+        const url =
+            `/.netlify/functions/fixtures?date=${encodeURIComponent(selectedDate)}`;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.success !== true) {
+            throw new Error(
+                data.error || 'Impossible de charger les matchs.'
+            );
+        }
+
+        useFootballData(data);
+
+        lastLoadedDate = selectedDate;
+
+        try {
+            localStorage.setItem(cacheKey, JSON.stringify({
+                timestamp: Date.now(),
+                data: data
+            }));
+        } catch (error) {
+            console.log('Cache non sauvegardé.');
+        }
+
+    } catch (error) {
+        console.error('Erreur football :', error);
+
+        if (cachedData?.data?.success === true) {
+            useFootballData(cachedData.data);
+
+            matchesStatus.textContent =
+                'Données précédemment enregistrées.';
+        } else {
+            matchesContainer.innerHTML = `
+                <div class="match-empty">
+                    Impossible de charger les matchs actuellement.
+                    <br><br>
+                    Vérifie ta connexion et réessaie.
+                </div>
+            `;
+
+            matchesStatus.textContent =
+                'Erreur de chargement des matchs.';
+        }
+
+    } finally {
+        loadingMatches = false;
+    }
+}
+
+
+/* =========================================
+   ÉVÉNEMENTS DES FILTRES
+========================================= */
+
+countryFilter.addEventListener('change', () => {
+    updateLeagueFilter();
+    displayMatches();
+});
+
+leagueFilter.addEventListener('change', displayMatches);
+
+matchDate.addEventListener('change', () => {
+    loadFootballMatches(true);
+});
+
+
+/* =========================================
+   DÉMARRAGE DU SITE
+========================================= */
+
+matchDate.value = getAbidjanDate();
+
+loadFootballMatches();
+
+</script> </body>  
 </html>
