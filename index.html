@@ -1,825 +1,316 @@
-<!DOCTYPE html>  <html lang="fr">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1">  
-<meta name="theme-color" content="#faf9f6">  
-<meta name="description" content="DANI PREDICTORS — football, analyses, statistiques et catégories de jeux.">  
-<title>DANI PREDICTORS | Accueil</title>  
-<style>  
-:root{  
- --ink:#111217;--muted:#737681;--gold:#c79536;--gold2:#edc66f;--paper:#fbfaf5;  
- --line:#e7e5e9;--soft:#f3f1ec;--pink:#e8cbd2;--shadow:0 9px 24px rgba(25,25,35,.07);  
- --green:#54d9a5;--blue:#70b5ed;--purple:#9564df;--red:#e65b70  
-}  
-*{box-sizing:border-box}  
-html{scroll-behavior:smooth;scroll-padding-top:85px}  
-body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.45}  
-button,a{font:inherit}a{color:inherit;text-decoration:none}  
-.app{max-width:760px;min-height:100vh;margin:auto;background:  
- linear-gradient(133deg,transparent 0 18%,rgba(232,203,210,.55) 18.1%,transparent 18.35% 43%,rgba(232,203,210,.42) 43.1%,transparent 43.35%),  
- linear-gradient(42deg,transparent 0 54%,rgba(232,203,210,.38) 54.1%,transparent 54.35%),var(--paper);  
- position:relative;padding-bottom:105px;overflow:hidden}  
-.top{padding:20px 24px 14px;display:flex;align-items:center;justify-content:space-between}  
-.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:.5px}  
-.brand-mark{width:39px;height:39px;border-radius:13px;background:#101115;color:var(--gold2);display:grid;place-items:center;font-size:16px;border:1px solid var(--gold)}  
-.brand-name{font-size:18px}.brand-name span{color:var(--gold)}  
-.top-actions{display:flex;gap:17px}.icon-btn{border:0;background:transparent;color:#20232b;font-size:23px;padding:5px;cursor:pointer}  
-.greeting{padding:17px 24px 12px;font-size:21px;font-weight:650;letter-spacing:-.3px}  
-.subline{padding:0 24px 13px;color:var(--muted);font-size:12px;letter-spacing:1.6px;text-transform:uppercase}  
-.content{padding:5px 18px 25px}  
-.category-list{display:grid;gap:13px}  
-.category{min-height:91px;display:flex;align-items:center;position:relative;overflow:hidden;background:rgba(255,254,248,.96);border:1px solid #e5e3e8;border-radius:27px;box-shadow:var(--shadow);padding:0 0 0 22px;transition:transform .18s,border-color .18s}  
-.category:active{transform:scale(.985)}.category:hover{border-color:#d7bd84}  
-.cat-icon{width:45px;flex:0 0 45px;font-size:25px;color:var(--gold);display:grid;place-items:center}  
-.cat-label{padding-left:14px;position:relative;z-index:2;font-size:16px;font-weight:650;letter-spacing:2px;text-transform:uppercase;max-width:62%}  
-.cat-art{position:absolute;right:0;top:0;height:100%;width:35%;clip-path:polygon(22% 0,100% 0,100% 100%,0 100%);display:grid;place-items:center;color:#fff;font-size:30px;font-weight:900;text-shadow:0 2px 8px #0008}  
-.art-casino{background:radial-gradient(circle at 70% 25%,#a77b3d,#282018 60%,#0c0d11)}  
-.art-sport{background:radial-gradient(circle at 70% 30%,#4f8caa,#172c39 62%,#101116)}  
-.art-fifa{background:linear-gradient(135deg,#dedde0,#aeb2bb);color:#151515;text-shadow:none;font-size:25px}  
-.art-vip{background:radial-gradient(circle at 65% 25%,#a17bd1,#282039 70%,#111)}  
-.art-services{background:radial-gradient(circle at 60% 40%,#3f6d8b,#10202d 70%,#090d12)}  
-.art-history{background:linear-gradient(135deg,#78602d,#201b14 70%,#0d0e12)}  
-.category small{display:block;font-size:10px;letter-spacing:.4px;color:#8a8990;text-transform:none;margin-top:3px}  
-.section-title{display:flex;align-items:center;justify-content:space-between;padding:22px 5px 13px}  
-.section-title h2{font-size:20px;margin:0;letter-spacing:-.4px}  
-.back-row{display:flex;align-items:center;gap:15px;padding:8px 5px 18px}  
-.back{border:0;background:transparent;font-size:27px;cursor:pointer;color:#20232b;padding:0 5px}  
-.page-title{font-size:25px;font-weight:900;margin:0}  
-.subcategory-list{display:grid;gap:13px}  
-.subcategory{min-height:91px;background:#fff;border:1px solid #e4e3e8;border-radius:26px;box-shadow:var(--shadow);display:flex;align-items:center;padding:16px 20px;gap:20px;transition:.18s;cursor:pointer}  
-.subcategory:hover{border-color:#d6bd85;transform:translateY(-1px)}  
-.sub-icon{width:50px;flex:0 0 50px;font-size:30px;text-align:center;color:var(--gold)}  
-.sub-label{font-size:16px;letter-spacing:1.8px;font-weight:650;text-transform:uppercase;line-height:1.3}  
-.sub-note{font-size:11px;color:var(--muted);letter-spacing:0;text-transform:none;margin-top:4px}  
-.info-panel{margin:18px 3px 0;background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:var(--shadow);color:var(--muted);font-size:13px}  
-.info-panel strong{color:var(--ink)}  
-.bottom-wrap{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);width:min(710px,calc(100% - 34px));z-index:10;display:flex;justify-content:space-between;align-items:center;gap:12px;pointer-events:none}  
-.bottom-nav,.bot-fab{pointer-events:auto;background:rgba(241,241,243,.94);backdrop-filter:blur(14px);border:1px solid #e6e5e9;box-shadow:0 8px 25px #00000012;border-radius:50px}  
-.bottom-nav{display:flex;justify-content:space-around;align-items:center;gap:3px;padding:10px 12px;flex:1}  
-.bottom-item{border:0;background:transparent;color:#596071;display:grid;justify-items:center;gap:2px;padding:5px 9px;cursor:pointer;font-size:22px;min-width:47px}  
-.bottom-item span{font-size:9px;letter-spacing:.2px}.bottom-item.active{color:#df790e}  
-.bot-fab{width:72px;height:72px;border:0;color:#4b566a;font-size:28px;cursor:pointer}  
-.view{display:none}.view.active{display:block}  
-.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#15161b;color:#fff;border:1px solid var(--gold);border-radius:20px;padding:10px 16px;font-size:12px;z-index:60;display:none;max-width:90%;text-align:center}  
-.footer-note{padding:12px 24px 0;text-align:center;font-size:10px;color:#8a8990}  
-.promo-overlay{position:fixed;inset:0;background:rgba(12,13,17,.72);backdrop-filter:blur(5px);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}  
-.promo-modal{width:min(440px,100%);background:#fffdf7;border:1px solid #d8bd80;border-radius:25px;box-shadow:0 22px 70px #0007;position:relative;padding:26px 22px 22px;text-align:center}  
-.promo-close{position:absolute;right:13px;top:10px;border:0;background:#f0eee8;border-radius:50%;width:34px;height:34px;font-size:21px;color:#4b4b50;cursor:pointer}  
-.promo-kicker{color:#a77b2c;font-size:11px;font-weight:850;letter-spacing:2px;text-transform:uppercase;margin:4px 30px 10px}  
-.promo-modal h2{font-size:25px;line-height:1.15;margin:0 0 10px;color:#17181e}  
-.promo-modal p{font-size:13px;color:#666873;margin:0 0 16px}  
-.promo-code-box{background:#17181e;border-radius:17px;padding:15px;margin:16px 0;color:#fff}  
-.promo-code-box small{display:block;color:#c5c5cc;font-size:10px;letter-spacing:1.5px}  
-.promo-code{display:block;font-size:35px;letter-spacing:5px;font-weight:950;color:#e7c36e;margin:3px 0 10px}  
-.promo-copy{border:1px solid #c5a45d;background:transparent;color:#f5d98e;border-radius:10px;padding:9px 15px;font-weight:700;cursor:pointer}  
-.promo-cta{display:block;background:#c79536;color:#17130b;font-weight:850;border-radius:13px;padding:14px 16px;margin-top:12px}  
-.promo-disclosure{font-size:10px!important;line-height:1.45;color:#777!important;margin:14px 0 0!important}  
-.promo-later{border:0;background:transparent;color:#777;font-size:12px;text-decoration:underline;margin-top:13px;cursor:pointer}  
-.matches-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:15px 0}  
-.matches-toolbar input,.matches-toolbar select{flex:1;min-width:130px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);min-height:46px}  
-.matches-status{font-size:12px;color:var(--muted);margin:10px 3px}  
-.country-title{margin:22px 3px 10px;font-size:16px;font-weight:850;color:#a77b2c}  
-.league-title{font-size:13px;font-weight:750;margin:12px 3px 8px}  
-.match-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:13px;margin-bottom:10px;box-shadow:var(--shadow)}  
-.match-meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin-bottom:12px}  
-.match-teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;text-align:center;font-weight:750}  
-.match-team img{width:30px;height:30px;object-fit:contain;display:block;margin:0 auto 5px}  
-.match-team span{font-size:12px;overflow-wrap:anywhere}  
-.match-score{font-size:17px;font-weight:900;white-space:nowrap}  
-.match-empty{text-align:center;padding:25px;color:var(--muted);background:#fff;border:1px dashed var(--line);border-radius:16px;margin:12px 0}  
-@media(min-width:760px){  
- .app{margin:18px auto;min-height:calc(100vh - 36px);border:1px solid #eee;border-radius:28px;box-shadow:0 15px 55px #0000000d}  
- .bottom-wrap{bottom:25px}  
-}  
-</style>  
-</head>  
-<body>  
-<div class="app">  
- <div class="toast" id="toast" role="status"></div>   <header class="top">  
-  <a class="brand" href="#home" aria-label="DANI PREDICTORS">  
-   <span class="brand-mark">DP</span>  
-   <span class="brand-name">DANI <span>PREDICTORS</span></span>  
-  </a>  
-  <div class="top-actions">  
-   <button class="icon-btn" aria-label="Offres" onclick="notify('Les offres seront disponibles prochainement.')">♙</button>  
-   <button class="icon-btn" aria-label="Notifications" onclick="notify('Aucune nouvelle notification.')">♧</button>  
-   <button class="icon-btn" aria-label="Paramètres" onclick="notify('Paramètres en préparation.')">⚙</button>  
-   <button class="icon-btn" aria-label="Profil" onclick="notify('Les comptes membres seront ajoutés dans une prochaine version.')">♙</button>  
-  </div>  
- </header>   <main>  
-  <section class="view active" id="home">  
-   <div class="greeting">Choisissez votre catégorie</div>  
-   <div class="subline">DANI PREDICTORS · ANALYSE · DISCIPLINE · TRANSPARENCE</div>  
-   <div class="content">  
-    <div class="category-list">  
-     <a class="category" href="#jeux" onclick="showView('games');return false"><span class="cat-icon">🎲</span><span class="cat-label">Casino<small>Aviator · JetX · Mines · Plinko</small></span><span class="cat-art art-casino">♠</span></a>  
-     <a class="category" href="#promo" onclick="showView('promo');return false"><span class="cat-icon" style="color:#c79536">🎟️</span><span class="cat-label">Code promo partenaire<small>Inscription avec NILO3</small></span><span class="cat-art art-vip">NILO3</span></a>  
-     <a class="category" href="#football" onclick="showView('football');return false"><span class="cat-icon" style="color:#66a9e5">🏆</span><span class="cat-label">Sport<small>Pronostics et statistiques</small></span><span class="cat-art art-sport">⚽</span></a>  
-     <a class="category" href="#esport" onclick="showView('esport');return false"><span class="cat-icon">🎮</span><span class="cat-label">E-sport FIFA<small>Catégorie à développer</small></span><span class="cat-art art-fifa">FC</span></a>  
-     <a class="category" href="#vip" onclick="showView('vip');return false"><span class="cat-icon" style="color:#9564df">♛</span><span class="cat-label">Coupon VIP<small>Accès membre en préparation</small></span><span class="cat-art art-vip">VIP</span></a>  
-     <a class="category" href="#services" onclick="showView('services');return false"><span class="cat-icon" style="color:#9564df">▦</span><span class="cat-label">Services<small>Outils et informations</small></span><span class="cat-art art-services">DP</span></a>  
-     <a class="category" href="#history" onclick="showView('history');return false"><span class="cat-icon" style="color:#c58a36">◷</span><span class="cat-label">Historique VIP<small>Suivi des publications à venir</small></span><span class="cat-art art-history">📈</span></a>  
-    </div>  
-    <div class="info-panel"><strong>Bienvenue sur DANI PREDICTORS.</strong><br>Une plateforme de pronostics football et de contenus statistiques sur plusieurs jeux. Les données en direct, les comptes et les paiements ne sont pas encore tous connectés.</div>  
-    <div class="footer-note">Les analyses sont des estimations. Aucun gain n'est garanti.</div>  
-   </div>  
-  </section>    <section class="view" id="football">  
-   <div class="content">  
-    <div class="back-row"><button class="back" onclick="showView('home')" aria-label="Retour">‹</button><h1 class="page-title">Football</h1></div>  
-    <div class="section-title"><h2>⚽ Matchs du jour</h2></div>  
-    <div class="matches-toolbar">  
-     <input type="date" id="matchDate" aria-label="Date des matchs">  
-     <select id="countryFilter" aria-label="Filtrer par pays"><option value="">Tous les pays</option></select>  
-     <select id="leagueFilter" aria-label="Filtrer par championnat"><option value="">Tous les championnats</option></select>  
-    </div>  
-    <div class="matches-status" id="matchesStatus" aria-live="polite">Chargement des matchs...</div>  
-    <div id="matchesContainer"><div class="match-empty">Les matchs seront affichés ici.</div></div>  <div class="section-title"><h2>Nos rubriques football</h2></div>  
-<div class="subcategory-list">  
- <button class="subcategory" onclick="notify('Les pronostics seront publiés après vérification des matchs et des données.')"><span class="sub-icon" style="color:#55d9a3">♢</span><span><span class="sub-label">Pronos sûrs</span><span class="sub-note">Sélections prudentes, sans garantie de résultat</span></span></button>  
- <button class="subcategory" onclick="notify('La rubrique meilleur coupon total sera alimentée après vérification.')"><span class="sub-icon" style="color:#e4b83e">▣</span><span><span class="sub-label">Meilleur coupon total</span><span class="sub-note">Combinaisons et analyses argumentées</span></span></button>  
- <button class="subcategory" onclick="notify('La rubrique matchs combinés est en préparation.')"><span class="sub-icon" style="color:#69aee8">▱</span><span><span class="sub-label">Matchs combinés</span><span class="sub-note">Sélections multiples à analyser</span></span></button>  
- <button class="subcategory" onclick="notify('Le Top 5 sera publié lorsque les rencontres auront été vérifiées.')"><span class="sub-icon" style="color:#e7c83e">☆</span><span><span class="sub-label">Top 5 du jour</span><span class="sub-note">Sélection quotidienne à actualiser</span></span></button>  
- <button class="subcategory" onclick="notify('Les coupons à cote élevée comportent un risque important.')"><span class="sub-icon" style="color:#e35c70">⌁</span><span><span class="sub-label">Cote 50+ du dimanche</span><span class="sub-note">Contenu à risque élevé, jamais garanti</span></span></button>  
- <button class="subcategory" onclick="notify('Les analyses plus/moins de buts seront ajoutées ici.')"><span class="sub-icon" style="color:#9564df">＃</span><span><span class="sub-label">Plus / moins de buts</span><span class="sub-note">Étude des tendances de buts</span></span></button>  
- <button class="subcategory" onclick="notify('Les matchs simples seront ajoutés ici.')"><span class="sub-icon" style="color:#9ba8b8">♙</span><span><span class="sub-label">Match simple</span><span class="sub-note">Analyse d'une rencontre</span></span></button>  
- <button class="subcategory" onclick="notify('Les estimations de score exact seront clairement signalées comme incertaines.')"><span class="sub-icon" style="color:#e35c70">◎</span><span><span class="sub-label">Score exact</span><span class="sub-note">Estimation indicative uniquement</span></span></button>  
-</div>  
-<div class="info-panel"><strong>Transparence :</strong> aucun match, score, classement ou pronostic fictif n'est affiché. Les données sont fournies par API-Football et doivent être actualisées avant toute analyse.</div>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#faf9f6">
+<meta name="description" content="DANI PREDICTORS — football, analyses, statistiques et catégories de jeux.">
+<title>DANI PREDICTORS | Accueil</title>
+<style>
+:root{--ink:#111217;--muted:#737681;--gold:#c79536;--gold2:#edc66f;--paper:#fbfaf5;--line:#e7e5e9;--soft:#f3f1ec;--shadow:0 9px 24px rgba(25,25,35,.07);--green:#248b67;--blue:#397eb5;--purple:#8055bd;--red:#c94e61}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:85px}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.45}button,a{font:inherit}a{color:inherit;text-decoration:none}button{cursor:pointer}
+.app{max-width:760px;min-height:100vh;margin:auto;background:linear-gradient(133deg,transparent 0 18%,rgba(232,203,210,.42) 18.1%,transparent 18.35% 43%,rgba(232,203,210,.32) 43.1%,transparent 43.35%),var(--paper);position:relative;padding-bottom:105px;overflow:hidden}
+.top{padding:20px 24px 14px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:10px;font-weight:950;letter-spacing:.5px}.brand-mark{width:39px;height:39px;border-radius:13px;background:#101115;color:var(--gold2);display:grid;place-items:center;font-size:16px;border:1px solid var(--gold)}.brand-name{font-size:18px}.brand-name span{color:var(--gold)}.top-actions{display:flex;gap:12px}.icon-btn{border:0;background:transparent;color:#20232b;font-size:21px;padding:5px}
+.greeting{padding:17px 24px 12px;font-size:21px;font-weight:650}.subline{padding:0 24px 13px;color:var(--muted);font-size:11px;letter-spacing:1.3px;text-transform:uppercase}.content{padding:5px 18px 25px}.category-list,.subcategory-list{display:grid;gap:13px}.category{min-height:91px;display:flex;align-items:center;position:relative;overflow:hidden;background:rgba(255,254,248,.96);border:1px solid #e5e3e8;border-radius:25px;box-shadow:var(--shadow);padding:0 0 0 22px}.cat-icon{width:45px;flex:0 0 45px;font-size:25px;color:var(--gold);display:grid;place-items:center}.cat-label{padding-left:14px;position:relative;z-index:2;font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;max-width:65%}.cat-art{position:absolute;right:0;top:0;height:100%;width:35%;clip-path:polygon(22% 0,100% 0,100% 100%,0 100%);display:grid;place-items:center;color:#fff;font-size:27px;font-weight:900;text-shadow:0 2px 8px #0008}.art-casino{background:radial-gradient(circle at 70% 25%,#a77b3d,#282018 60%,#0c0d11)}.art-sport{background:radial-gradient(circle at 70% 30%,#4f8caa,#172c39 62%,#101116)}.art-fifa{background:linear-gradient(135deg,#dedde0,#aeb2bb);color:#151515;text-shadow:none}.art-vip{background:radial-gradient(circle at 65% 25%,#a17bd1,#282039 70%,#111)}.art-services{background:radial-gradient(circle at 60% 40%,#3f6d8b,#10202d 70%,#090d12)}.art-history{background:linear-gradient(135deg,#78602d,#201b14 70%,#0d0e12)}.category small{display:block;font-size:10px;letter-spacing:.2px;color:#8a8990;text-transform:none;margin-top:4px}
+.section-title{display:flex;align-items:center;justify-content:space-between;padding:22px 5px 13px}.section-title h2{font-size:19px;margin:0}.back-row{display:flex;align-items:center;gap:15px;padding:8px 5px 18px}.back{border:0;background:transparent;font-size:28px;color:#20232b;padding:0 5px}.page-title{font-size:25px;font-weight:900;margin:0}.subcategory{min-height:83px;background:#fff;border:1px solid #e4e3e8;border-radius:22px;box-shadow:var(--shadow);display:flex;align-items:center;padding:15px 17px;gap:16px;text-align:left;width:100%;color:var(--ink)}.subcategory:active{transform:scale(.99)}.sub-icon{width:43px;flex:0 0 43px;font-size:29px;text-align:center;color:var(--gold)}.sub-label{display:block;font-size:14px;letter-spacing:1.3px;font-weight:750;text-transform:uppercase;line-height:1.3}.sub-note{display:block;font-size:11px;color:var(--muted);letter-spacing:0;text-transform:none;margin-top:4px}.info-panel{margin:18px 3px 0;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);color:var(--muted);font-size:12px}.info-panel strong{color:var(--ink)}.footer-note{padding:12px 24px 0;text-align:center;font-size:10px;color:#8a8990}
+.view{display:none}.view.active{display:block}.bottom-wrap{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);width:min(710px,calc(100% - 34px));z-index:10;display:flex;justify-content:space-between;align-items:center;gap:12px;pointer-events:none}.bottom-nav,.bot-fab{pointer-events:auto;background:rgba(241,241,243,.95);backdrop-filter:blur(14px);border:1px solid #e6e5e9;box-shadow:0 8px 25px #00000012;border-radius:50px}.bottom-nav{display:flex;justify-content:space-around;align-items:center;gap:3px;padding:9px 10px;flex:1}.bottom-item{border:0;background:transparent;color:#596071;display:grid;justify-items:center;gap:2px;padding:5px 8px;font-size:20px;min-width:45px}.bottom-item span{font-size:9px}.bottom-item.active{color:#df790e}.bot-fab{width:65px;height:65px;border:0;color:#4b566a;font-size:26px}.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#15161b;color:#fff;border:1px solid var(--gold);border-radius:20px;padding:10px 16px;font-size:12px;z-index:60;display:none;max-width:90%;text-align:center}
+.promo-overlay{position:fixed;inset:0;background:rgba(12,13,17,.72);backdrop-filter:blur(5px);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}.promo-modal{width:min(440px,100%);background:#fffdf7;border:1px solid #d8bd80;border-radius:25px;box-shadow:0 22px 70px #0007;position:relative;padding:26px 22px 22px;text-align:center}.promo-close{position:absolute;right:13px;top:10px;border:0;background:#f0eee8;border-radius:50%;width:34px;height:34px;font-size:21px;color:#4b4b50}.promo-kicker{color:#a77b2c;font-size:11px;font-weight:850;letter-spacing:2px;text-transform:uppercase;margin:4px 30px 10px}.promo-modal h2{font-size:24px;line-height:1.15;margin:0 0 10px}.promo-modal p{font-size:12px;color:#666873;margin:0 0 16px}.promo-code-box{background:#17181e;border-radius:17px;padding:15px;margin:16px 0;color:#fff}.promo-code-box small{display:block;color:#c5c5cc;font-size:10px;letter-spacing:1.5px}.promo-code{display:block;font-size:34px;letter-spacing:5px;font-weight:950;color:#e7c36e;margin:3px 0 10px}.promo-copy{border:1px solid #c5a45d;background:transparent;color:#f5d98e;border-radius:10px;padding:9px 15px;font-weight:700}.promo-cta{display:block;background:#c79536;color:#17130b;font-weight:850;border-radius:13px;padding:13px 16px;margin-top:12px}.promo-disclosure{font-size:10px!important;line-height:1.45;color:#777!important;margin:14px 0 0!important}.promo-later{border:0;background:transparent;color:#777;font-size:12px;text-decoration:underline;margin-top:13px}
+.matches-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:13px 0}.matches-toolbar input,.matches-toolbar select{flex:1;min-width:125px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);min-height:44px}.matches-status{font-size:11px;color:var(--muted);margin:10px 3px}.match-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}.match-tab{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 5px;color:#555;font-size:11px;font-weight:750}.match-tab b{display:block;font-size:17px;color:var(--ink)}.match-tab.active{border-color:var(--gold);background:#fff8e8;color:#8a621f}.country-title{margin:20px 3px 9px;font-size:15px;font-weight:850;color:#a77b2c}.league-title{font-size:12px;font-weight:800;margin:12px 3px 7px}.match-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:9px;box-shadow:var(--shadow)}.match-meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:10px;margin-bottom:11px}.match-teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:7px;text-align:center;font-weight:750}.match-team img{width:28px;height:28px;object-fit:contain;display:block;margin:0 auto 5px}.match-team span{font-size:11px;overflow-wrap:anywhere}.match-score{font-size:16px;font-weight:900;white-space:nowrap}.match-empty{text-align:center;padding:23px 15px;color:var(--muted);background:#fff;border:1px dashed var(--line);border-radius:16px;margin:12px 0;font-size:12px}.rubric-heading{background:#17181e;color:#fff;border-radius:18px;padding:17px;margin:0 0 14px}.rubric-heading h2{margin:0 0 5px;font-size:19px}.rubric-heading p{margin:0;color:#dedde2;font-size:11px}.rubric-warning{background:#fff8e8;border:1px solid #ead6a8;border-radius:14px;padding:12px;margin:10px 0 15px;color:#6f5726;font-size:11px}.rubric-count{font-size:11px;color:var(--muted);margin:10px 3px}.small-action{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:700}
+@media(min-width:760px){.app{margin:18px auto;min-height:calc(100vh - 36px);border:1px solid #eee;border-radius:28px;box-shadow:0 15px 55px #0000000d}.bottom-wrap{bottom:25px}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="toast" id="toast" role="status"></div>
+<header class="top">
+  <a class="brand" href="#home" onclick="showView('home');return false" aria-label="DANI PREDICTORS"><span class="brand-mark">DP</span><span class="brand-name">DANI <span>PREDICTORS</span></span></a>
+  <div class="top-actions"><button class="icon-btn" aria-label="Offres" onclick="notify('Les offres seront disponibles prochainement.')">♙</button><button class="icon-btn" aria-label="Notifications" onclick="notify('Aucune nouvelle notification.')">♧</button><button class="icon-btn" aria-label="Paramètres" onclick="notify('Paramètres en préparation.')">⚙</button></div>
+</header>
+<main>
+<section class="view active" id="home">
+  <div class="greeting">Choisissez votre catégorie</div><div class="subline">DANI PREDICTORS · ANALYSE · DISCIPLINE · TRANSPARENCE</div>
+  <div class="content"><div class="category-list">
+    <a class="category" href="#games" onclick="showView('games');return false"><span class="cat-icon">🎲</span><span class="cat-label">Casino<small>Aviator · JetX · Mines · Plinko</small></span><span class="cat-art art-casino">♠</span></a>
+    <a class="category" href="#promo" onclick="showView('promo');return false"><span class="cat-icon">🎟️</span><span class="cat-label">Code promo partenaire<small>Inscription avec NILO3</small></span><span class="cat-art art-vip">NILO3</span></a>
+    <a class="category" href="#football" onclick="showView('football');return false"><span class="cat-icon" style="color:#66a9e5">🏆</span><span class="cat-label">Sport<small>Matchs, analyses et rubriques</small></span><span class="cat-art art-sport">⚽</span></a>
+    <a class="category" href="#esport" onclick="showView('esport');return false"><span class="cat-icon">🎮</span><span class="cat-label">E-sport FIFA<small>Catégorie à développer</small></span><span class="cat-art art-fifa">FC</span></a>
+    <a class="category" href="#vip" onclick="showView('vip');return false"><span class="cat-icon" style="color:#9564df">♛</span><span class="cat-label">Coupon VIP<small>Accès membre en préparation</small></span><span class="cat-art art-vip">VIP</span></a>
+    <a class="category" href="#services" onclick="showView('services');return false"><span class="cat-icon" style="color:#9564df">▦</span><span class="cat-label">Services<small>Outils et informations</small></span><span class="cat-art art-services">DP</span></a>
+    <a class="category" href="#history" onclick="showView('history');return false"><span class="cat-icon">◷</span><span class="cat-label">Historique VIP<small>Suivi des publications</small></span><span class="cat-art art-history">📈</span></a>
+  </div>
+  <div class="info-panel"><strong>Bienvenue sur DANI PREDICTORS.</strong><br>Une plateforme de matchs et d'analyses football. Les données proviennent d'API-Football. Les pronostics ne sont publiés que lorsque les informations nécessaires sont disponibles.</div>
+  <div class="footer-note">Les analyses sont des estimations. Aucun gain n'est garanti.</div></div>
+</section>
 
-   </div>  
-  </section>    <section class="view" id="games">  
-   <div class="content">  
-    <div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Casino</h1></div>  
-    <p style="margin:0 4px 15px;color:#737681;font-size:13px">Retrouve ici tous les jeux de la rubrique Casino :</p>  
-    <div class="subcategory-list">  
-     <button class="subcategory" onclick="notify('Fiche éducative Aviator en préparation.')"><span class="sub-icon">✈️</span><span><span class="sub-label">Aviator</span><span class="sub-note">Historique, hasard et gestion du risque</span></span></button>  
-     <button class="subcategory" onclick="notify('Fiche éducative JetX en préparation.')"><span class="sub-icon">🚀</span><span><span class="sub-label">JetX</span><span class="sub-note">Fonctionnement et probabilités</span></span></button>  
-     <button class="subcategory" onclick="notify('Fiche éducative Mines en préparation.')"><span class="sub-icon">💣</span><span><span class="sub-label">Mines</span><span class="sub-note">Règles et probabilités</span></span></button>  
-     <button class="subcategory" onclick="notify('Fiche éducative Plinko en préparation.')"><span class="sub-icon">🔵</span><span><span class="sub-label">Plinko</span><span class="sub-note">Mécanismes aléatoires</span></span></button>  
-     <button class="subcategory" onclick="notify('D’autres jeux pourront être ajoutés.')"><span class="sub-icon">▦</span><span><span class="sub-label">Autres jeux</span><span class="sub-note">Nouvelles catégories à venir</span></span></button>  
-    </div>  
-    <div class="info-panel"><strong>Important :</strong> les résultats passés ne permettent pas de connaître les prochains résultats de jeux aléatoires. Aucun graphique ou historique ne garantit un gain.</div>  
-   </div>  
-  </section>    <section class="view" id="vip">  
-   <div class="content">  
-    <div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Coupon VIP</h1></div>  
-    <div class="subcategory-list">  
-     <div class="subcategory"><span class="sub-icon">♛</span><span><span class="sub-label">VIP 7 jours</span><span class="sub-note">Prix à définir · paiement non activé</span></span></div>  
-     <div class="subcategory"><span class="sub-icon">👑</span><span><span class="sub-label">VIP 30 jours</span><span class="sub-note">Prix à définir · paiement non activé</span></span></div>  
-    </div>  
-    <div class="info-panel">Les comptes, abonnements et validations de paiement seront développés et testés avant toute commercialisation.</div>  
-   </div>  
-  </section>    <section class="view" id="esport"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">E-sport FIFA</h1></div><div class="info-panel">Cette rubrique est prévue pour les analyses et contenus e-sport. Aucun événement ni résultat n'est actuellement connecté.</div></div></section>    <section class="view" id="services">  
-   <div class="content">  
-    <div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Services</h1></div>  
-    <div class="subcategory-list">  
-     <a class="subcategory" href="#promo" onclick="showView('promo');return false"><span class="sub-icon">🎟️</span><span><span class="sub-label">Code promo NILO3</span><span class="sub-note">Copier le code partenaire</span></span></a>  
-     <div class="subcategory"><span class="sub-icon">📊</span><span><span class="sub-label">Statistiques</span><span class="sub-note">Outils et données à connecter</span></span></div>  
-     <div class="subcategory"><span class="sub-icon">☎</span><span><span class="sub-label">Contact</span><span class="sub-note">Coordonnées à configurer</span></span></div>  
-    </div>  
-   </div>  
-  </section>    <section class="view" id="history"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Historique VIP</h1></div><div class="info-panel">L'historique des publications sera disponible après la mise en place du système de publication et de suivi des résultats. Aucun historique fictif n'est présenté.</div></div></section>    <section class="view" id="promo">  
-   <div class="content">  
-    <div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Code partenaire</h1></div>  
-    <div class="subcategory" style="display:block;padding:22px">  
-     <div class="sub-label">Code promo NILO3</div>  
-     <div id="promoCode" style="font-size:34px;font-weight:950;letter-spacing:5px;color:#c79536;margin:15px 0">NILO3</div>  
-     <button class="btn" style="border:0;background:#17181e;color:#f3d58e;border-radius:13px;padding:12px 18px" id="copyBtn">Copier le code</button>  
-     <p class="sub-note" style="margin-top:15px">Lien partenaire : <a href="https://1win.ci/casino?p=hg6e" target="_blank" rel="noopener noreferrer" style="color:#9b742f;text-decoration:underline">visiter l'opérateur ↗</a></p>  
-     <p class="sub-note">Lien partenaire susceptible de générer une commission. Les offres éventuelles dépendent des conditions officielles de l'opérateur, du pays et de l'éligibilité.</p>  
-    </div>  
-   </div>  
-  </section>  
- </main>   <div class="promo-overlay" id="promoWelcome" role="dialog" aria-modal="true" aria-labelledby="promoWelcomeTitle">  
-  <div class="promo-modal">  
-   <button class="promo-close" type="button" aria-label="Fermer l'annonce" onclick="closePromoWelcome()">×</button>  
-   <div class="promo-kicker">Offre partenaire · DANI PREDICTORS</div>  
-   <h2 id="promoWelcomeTitle">Découvre notre partenaire</h2>  
-   <p>Si tu souhaites créer un compte chez notre partenaire, tu peux utiliser notre lien et saisir le code promo <strong>NILO3</strong> lors de ton inscription, si cette option est proposée.</p>  
-   <div class="promo-code-box">  
-    <small>TON CODE PROMO</small>  
-    <span class="promo-code">NILO3</span>  
-    <button class="promo-copy" type="button" onclick="copyPartnerCode()">Copier le code</button>  
-   </div>  
-   <a class="promo-cta" href="https://1win.ci/casino?p=hg6e" target="_blank" rel="noopener noreferrer" onclick="closePromoWelcome()">Visiter le site partenaire ↗</a>  
-   <p class="promo-disclosure">Lien affilié : DANI PREDICTORS peut recevoir une commission. Toute offre ou tout bonus dépend des conditions officielles, du pays et de ton éligibilité. Réservé aux adultes autorisés par la réglementation locale. Joue de manière responsable ; aucun gain n'est garanti.</p>  
-   <button class="promo-later" type="button" onclick="closePromoWelcome()">Continuer sans visiter</button>  
-  </div>  
- </div>   <div class="bottom-wrap">  
-  <nav class="bottom-nav" aria-label="Navigation rapide">  
-   <button class="bottom-item active" onclick="showView('home',this)">🔥<span>Accueil</span></button>  
-   <button class="bottom-item" onclick="showView('games',this)">🎲<span>Casino</span></button>  
-   <button class="bottom-item" onclick="showView('football',this)">⚽<span>Sport</span></button>  
-   <button class="bottom-item" onclick="showView('vip',this)">♛<span>VIP</span></button>  
-   <button class="bottom-item" onclick="showView('history',this)">◷<span>Historique</span></button>  
-  </nav>  
-  <button class="bot-fab" aria-label="Assistant" onclick="notify('Assistant DANI PREDICTORS : bientôt disponible.')">▣</button>  
- </div>  
-</div>   <script>
-/* =========================================
-   DANI PREDICTORS — SCRIPT PRINCIPAL
-========================================= */
+<section class="view" id="football">
+ <div class="content">
+  <div class="back-row"><button class="back" onclick="showView('home')" aria-label="Retour">‹</button><h1 class="page-title">Football</h1></div>
+  <div class="section-title"><h2>⚽ Rencontres</h2><button class="small-action" onclick="loadFootballMatches(true)">↻ Actualiser</button></div>
+  <div class="matches-toolbar"><input type="date" id="matchDate" aria-label="Date des matchs"><select id="countryFilter" aria-label="Filtrer par pays"><option value="">Tous les pays</option></select><select id="leagueFilter" aria-label="Filtrer par championnat"><option value="">Tous les championnats</option></select></div>
+  <div class="match-tabs" aria-label="Catégories de matchs">
+    <button class="match-tab active" data-status="upcoming" onclick="setMatchStatus('upcoming',this)">À venir <b id="countUpcoming">0</b></button>
+    <button class="match-tab" data-status="live" onclick="setMatchStatus('live',this)">En direct <b id="countLive">0</b></button>
+    <button class="match-tab" data-status="finished" onclick="setMatchStatus('finished',this)">Résultats <b id="countFinished">0</b></button>
+  </div>
+  <div class="matches-status" id="matchesStatus" aria-live="polite">Chargement des matchs...</div>
+  <div id="matchesContainer"><div class="match-empty">Les matchs seront affichés ici.</div></div>
+  <div class="section-title"><h2>Nos 8 rubriques football</h2></div>
+  <div class="subcategory-list">
+   <button class="subcategory" onclick="openRubric('safe')"><span class="sub-icon" style="color:#248b67">♢</span><span><span class="sub-label">Pronos sûrs</span><span class="sub-note">Rencontres à analyser · aucun pari n'est garanti</span></span></button>
+   <button class="subcategory" onclick="openRubric('coupon')"><span class="sub-icon" style="color:#c79536">▣</span><span><span class="sub-label">Meilleur coupon total</span><span class="sub-note">Préparation d'un coupon après vérification des cotes</span></span></button>
+   <button class="subcategory" onclick="openRubric('combined')"><span class="sub-icon" style="color:#397eb5">▱</span><span><span class="sub-label">Matchs combinés</span><span class="sub-note">Rencontres disponibles pour étude</span></span></button>
+   <button class="subcategory" onclick="openRubric('top5')"><span class="sub-icon" style="color:#c79536">☆</span><span><span class="sub-label">Top 5 du jour</span><span class="sub-note">Cinq prochaines rencontres à examiner</span></span></button>
+   <button class="subcategory" onclick="openRubric('odds')"><span class="sub-icon" style="color:#c94e61">⌁</span><span><span class="sub-label">Cote 50+ du dimanche</span><span class="sub-note">Disponible uniquement avec de vraies cotes vérifiées</span></span></button>
+   <button class="subcategory" onclick="openRubric('goals')"><span class="sub-icon" style="color:#8055bd">＃</span><span><span class="sub-label">Plus / moins de buts</span><span class="sub-note">Étude en attente de statistiques de buts</span></span></button>
+   <button class="subcategory" onclick="openRubric('single')"><span class="sub-icon" style="color:#737681">♙</span><span><span class="sub-label">Match simple</span><span class="sub-note">Analyse rencontre par rencontre</span></span></button>
+   <button class="subcategory" onclick="openRubric('exact')"><span class="sub-icon" style="color:#c94e61">◎</span><span><span class="sub-label">Score exact</span><span class="sub-note">Estimation impossible sans données suffisantes</span></span></button>
+  </div>
+  <div class="info-panel"><strong>Transparence :</strong> les matchs et scores affichés viennent de l'API. Les statistiques détaillées et les cotes bookmakers ne sont pas encore connectées ; aucune sélection ou cote fictive ne sera inventée.</div>
+ </div>
+</section>
 
+<section class="view" id="rubric"><div class="content">
+ <div class="back-row"><button class="back" onclick="showView('football')" aria-label="Retour au football">‹</button><h1 class="page-title" id="rubricPageTitle">Rubrique</h1></div>
+ <div class="rubric-heading"><h2 id="rubricHeading">Analyse football</h2><p id="rubricDescription"></p></div>
+ <div class="rubric-warning" id="rubricWarning"></div>
+ <div class="rubric-count" id="rubricCount"></div>
+ <div id="rubricMatches"></div>
+ </div></section>
+
+<section class="view" id="games"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Casino</h1></div><p style="color:#737681;font-size:13px">Guides informatifs sur les jeux :</p><div class="subcategory-list">
+ <div class="subcategory"><span class="sub-icon">✈️</span><span><span class="sub-label">Aviator</span><span class="sub-note">Hasard, fonctionnement et gestion du risque</span></span></div>
+ <div class="subcategory"><span class="sub-icon">🚀</span><span><span class="sub-label">JetX</span><span class="sub-note">Fonctionnement et probabilités</span></span></div>
+ <div class="subcategory"><span class="sub-icon">💣</span><span><span class="sub-label">Mines</span><span class="sub-note">Règles et probabilités</span></span></div>
+ <div class="subcategory"><span class="sub-icon">🔵</span><span><span class="sub-label">Plinko</span><span class="sub-note">Mécanismes aléatoires</span></span></div>
+ </div><div class="info-panel">Les résultats passés ne permettent pas de connaître les prochains résultats d'un jeu aléatoire. Aucun gain n'est garanti.</div></div></section>
+
+<section class="view" id="vip"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Coupon VIP</h1></div><div class="subcategory-list"><div class="subcategory"><span class="sub-icon">♛</span><span><span class="sub-label">VIP 7 jours</span><span class="sub-note">Prix à définir · paiement non activé</span></span></div><div class="subcategory"><span class="sub-icon">👑</span><span><span class="sub-label">VIP 30 jours</span><span class="sub-note">Prix à définir · paiement non activé</span></span></div></div><div class="info-panel">Les comptes, abonnements et validations de paiement doivent être développés et testés avant toute commercialisation.</div></div></section>
+<section class="view" id="esport"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">E-sport FIFA</h1></div><div class="info-panel">Cette rubrique est prévue pour les analyses et contenus e-sport. Aucun événement ni résultat n'est actuellement connecté.</div></div></section>
+<section class="view" id="services"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Services</h1></div><div class="subcategory-list"><button class="subcategory" onclick="showView('promo')"><span class="sub-icon">🎟️</span><span><span class="sub-label">Code promo NILO3</span><span class="sub-note">Voir le code partenaire</span></span></button><div class="subcategory"><span class="sub-icon">📊</span><span><span class="sub-label">Statistiques</span><span class="sub-note">Données détaillées à connecter</span></span></div><div class="subcategory"><span class="sub-icon">☎</span><span><span class="sub-label">Contact</span><span class="sub-note">Coordonnées à configurer</span></span></div></div></div></section>
+<section class="view" id="history"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Historique VIP</h1></div><div class="info-panel">L'historique des pronostics sera disponible après la mise en place du système de publication et de vérification des résultats. Aucun historique fictif n'est présenté.</div></div></section>
+<section class="view" id="promo"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Code partenaire</h1></div><div class="subcategory" style="display:block;padding:22px"><div class="sub-label">Code promo NILO3</div><div style="font-size:34px;font-weight:950;letter-spacing:5px;color:#c79536;margin:15px 0">NILO3</div><button class="small-action" onclick="copyPartnerCode()">Copier le code</button><p class="sub-note" style="margin-top:15px">Lien partenaire : <a href="https://1win.ci/casino?p=hg6e" target="_blank" rel="noopener noreferrer" style="color:#9b742f;text-decoration:underline">visiter l'opérateur ↗</a></p><p class="sub-note">Lien partenaire susceptible de générer une commission. Les offres dépendent des conditions officielles, du pays et de l'éligibilité.</p></div></div></section>
+</main>
+
+<div class="promo-overlay" id="promoWelcome" role="dialog" aria-modal="true" aria-labelledby="promoWelcomeTitle"><div class="promo-modal"><button class="promo-close" type="button" aria-label="Fermer" onclick="closePromoWelcome()">×</button><div class="promo-kicker">Offre partenaire · DANI PREDICTORS</div><h2 id="promoWelcomeTitle">Découvre notre partenaire</h2><p>Si tu souhaites créer un compte chez notre partenaire, tu peux utiliser notre lien et saisir le code promo <strong>NILO3</strong> lors de ton inscription, si cette option est proposée.</p><div class="promo-code-box"><small>TON CODE PROMO</small><span class="promo-code">NILO3</span><button class="promo-copy" onclick="copyPartnerCode()">Copier le code</button></div><a class="promo-cta" href="https://1win.ci/casino?p=hg6e" target="_blank" rel="noopener noreferrer" onclick="closePromoWelcome()">Visiter le site partenaire ↗</a><p class="promo-disclosure">Lien affilié : DANI PREDICTORS peut recevoir une commission. Toute offre dépend des conditions officielles, du pays et de ton éligibilité. Réservé aux adultes autorisés par la réglementation locale. Joue de manière responsable ; aucun gain n'est garanti.</p><button class="promo-later" onclick="closePromoWelcome()">Continuer sans visiter</button></div></div>
+
+<div class="bottom-wrap"><nav class="bottom-nav" aria-label="Navigation rapide"><button class="bottom-item active" onclick="showView('home',this)">🔥<span>Accueil</span></button><button class="bottom-item" onclick="showView('games',this)">🎲<span>Casino</span></button><button class="bottom-item" onclick="showView('football',this)">⚽<span>Sport</span></button><button class="bottom-item" onclick="showView('vip',this)">♛<span>VIP</span></button><button class="bottom-item" onclick="showView('history',this)">◷<span>Historique</span></button></nav><button class="bot-fab" aria-label="Assistant" onclick="notify('Assistant DANI PREDICTORS : bientôt disponible.')">▣</button></div>
+</div>
+
+<script>
+/* DANI PREDICTORS — interface football et rubriques */
 let allMatches = [];
 let loadingMatches = false;
 let lastLoadedDate = '';
-
+let selectedMatchStatus = 'upcoming';
 const matchesContainer = document.getElementById('matchesContainer');
 const matchesStatus = document.getElementById('matchesStatus');
 const countryFilter = document.getElementById('countryFilter');
 const leagueFilter = document.getElementById('leagueFilter');
 const matchDate = document.getElementById('matchDate');
-
-
-/* =========================================
-   NAVIGATION
-========================================= */
-
-function showView(id, button) {
-    document.querySelectorAll('.view').forEach(view => {
-        view.classList.remove('active');
-    });
-
-    const target = document.getElementById(id);
-
-    if (target) {
-        target.classList.add('active');
-    }
-
-    document.querySelectorAll('.bottom-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    if (button) {
-        button.classList.add('active');
-    } else {
-        const map = {
-            home: 0,
-            games: 1,
-            football: 2,
-            vip: 3,
-            history: 4
-        };
-
-        const items = document.querySelectorAll('.bottom-item');
-
-        if (map[id] !== undefined && items[map[id]]) {
-            items[map[id]].classList.add('active');
-        }
-    }
-
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-
-    if (
-        id === 'football' &&
-        lastLoadedDate !== matchDate.value &&
-        !loadingMatches
-    ) {
-        loadFootballMatches();
-    }
-}
-
-
-/* =========================================
-   NOTIFICATIONS
-========================================= */
-
 let toastTimer;
 
+function showView(id, button) {
+  document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.bottom-item').forEach(item => item.classList.remove('active'));
+  if (button) button.classList.add('active');
+  else {
+    const map = {home:0,games:1,football:2,rubric:2,vip:3,history:4};
+    const items = document.querySelectorAll('.bottom-item');
+    if (map[id] !== undefined && items[map[id]]) items[map[id]].classList.add('active');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (id === 'football' && lastLoadedDate !== matchDate.value && !loadingMatches) loadFootballMatches();
+}
 function notify(message) {
-    const toast = document.getElementById('toast');
-
-    if (!toast) return;
-
-    toast.textContent = message;
-    toast.style.display = 'block';
-
-    clearTimeout(toastTimer);
-
-    toastTimer = setTimeout(() => {
-        toast.style.display = 'none';
-    }, 2800);
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.style.display = 'none'; }, 2800);
 }
-
-
-/* =========================================
-   FENÊTRE PROMOTIONNELLE
-========================================= */
-
 function closePromoWelcome() {
-    const modal = document.getElementById('promoWelcome');
-
-    if (modal) {
-        modal.style.display = 'none';
-    }
-
-    try {
-        sessionStorage.setItem('daniPromoSeen', '1');
-    } catch (error) {}
+  document.getElementById('promoWelcome').style.display = 'none';
+  try { sessionStorage.setItem('daniPromoSeen','1'); } catch (error) {}
 }
-
-try {
-    if (sessionStorage.getItem('daniPromoSeen') === '1') {
-        const modal = document.getElementById('promoWelcome');
-
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    }
-} catch (error) {}
-
-
-/* =========================================
-   COPIE DU CODE PROMO
-========================================= */
-
+try { if (sessionStorage.getItem('daniPromoSeen') === '1') document.getElementById('promoWelcome').style.display = 'none'; } catch (error) {}
 async function copyPartnerCode() {
-    try {
-        await navigator.clipboard.writeText('NILO3');
-        notify('Code promo NILO3 copié !');
-    } catch (error) {
-        window.prompt('Copiez le code promo :', 'NILO3');
-    }
+  try { await navigator.clipboard.writeText('NILO3'); notify('Code promo NILO3 copié !'); }
+  catch (error) { window.prompt('Copiez le code promo :','NILO3'); }
 }
-
-const copyBtn = document.getElementById('copyBtn');
-
-if (copyBtn) {
-    copyBtn.addEventListener('click', copyPartnerCode);
-}
-
-
-/* =========================================
-   DATE DE CÔTE D'IVOIRE
-========================================= */
-
 function getAbidjanDate() {
-    const parts = new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'Africa/Abidjan',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    }).formatToParts(new Date());
-
-    const values = {};
-
-    parts.forEach(part => {
-        values[part.type] = part.value;
-    });
-
-    return `${values.year}-${values.month}-${values.day}`;
+  const parts = new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Abidjan',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const values = {}; parts.forEach(part => { values[part.type] = part.value; });
+  return `${values.year}-${values.month}-${values.day}`;
 }
-
-
-/* =========================================
-   PROTECTION DU TEXTE
-========================================= */
-
-function escapeMatchText(value) {
-    return String(value ?? '').replace(/[&<>"']/g, character => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    })[character]);
+function escapeText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[character]));
 }
-
-
-/* =========================================
-   TRADUCTION DES STATUTS
-========================================= */
-
+function getCategory(match) {
+  if (match.match_category) return match.match_category;
+  const status = String(match.status || '').toUpperCase();
+  if (['1H','HT','2H','ET','BT','P','LIVE','SUSP','INT'].includes(status)) return 'live';
+  if (['FT','AET','PEN'].includes(status)) return 'finished';
+  return 'upcoming';
+}
 function translateMatchStatus(status) {
-    const labels = {
-        NS: 'À venir',
-        TBD: 'À confirmer',
-        '1H': 'Première mi-temps',
-        HT: 'Mi-temps',
-        '2H': 'Deuxième mi-temps',
-        ET: 'Prolongations',
-        BT: 'Pause prolongations',
-        P: 'Tirs au but',
-        LIVE: 'En direct',
-        FT: 'Terminé',
-        AET: 'Terminé après prolongations',
-        PEN: 'Terminé aux tirs au but',
-        PST: 'Reporté',
-        CANC: 'Annulé',
-        ABD: 'Interrompu',
-        SUSP: 'Suspendu',
-        INT: 'Interrompu'
-    };
-
-    return labels[status] || status || 'Statut inconnu';
+  const labels = {NS:'À venir',TBD:'À confirmer','1H':'1re mi-temps',HT:'Mi-temps','2H':'2e mi-temps',ET:'Prolongations',BT:'Pause prolongations',P:'Tirs au but',LIVE:'En direct',FT:'Terminé',AET:'Terminé après prolongations',PEN:'Terminé aux tirs au but',SUSP:'Suspendu',INT:'Interrompu'};
+  return labels[status] || status || 'Statut inconnu';
 }
-
-
-/* =========================================
-   HEURE DES MATCHS
-========================================= */
-
-function formatMatchTime(dateValue) {
-    if (!dateValue) return '--:--';
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) {
-        return '--:--';
-    }
-
-    return date.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'Africa/Abidjan'
+function formatMatchTime(value) {
+  if (!value) return '--:--';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '--:--';
+  return date.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Abidjan'});
+}
+function getLeagueKey(match) { return String(match.league_id ?? match.league ?? ''); }
+function updateCounts() {
+  const counts = {upcoming:0,live:0,finished:0};
+  allMatches.forEach(match => { counts[getCategory(match)] += 1; });
+  document.getElementById('countUpcoming').textContent = counts.upcoming;
+  document.getElementById('countLive').textContent = counts.live;
+  document.getElementById('countFinished').textContent = counts.finished;
+}
+function setMatchStatus(status, button) {
+  selectedMatchStatus = status;
+  document.querySelectorAll('.match-tab').forEach(tab => tab.classList.remove('active'));
+  if (button) button.classList.add('active');
+  displayMatches();
+}
+function createMatchCard(match) {
+  const card = document.createElement('article');
+  card.className = 'match-card';
+  const meta = document.createElement('div'); meta.className = 'match-meta';
+  const dateText = new Date(match.match_date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',timeZone:'Africa/Abidjan'});
+  meta.textContent = `${dateText} · ${formatMatchTime(match.match_date)} · ${translateMatchStatus(match.status)}`;
+  const teams = document.createElement('div'); teams.className = 'match-teams';
+  const home = document.createElement('div'); home.className = 'match-team';
+  const away = document.createElement('div'); away.className = 'match-team';
+  [[home,match.home_logo,match.home_team],[away,match.away_logo,match.away_team]].forEach(([box,logo,name]) => {
+    if (logo && /^https:\/\//i.test(logo)) { const img = document.createElement('img'); img.src = logo; img.alt = ''; img.loading = 'lazy'; img.onerror = () => img.remove(); box.appendChild(img); }
+    const label = document.createElement('span'); label.textContent = name || 'Équipe inconnue'; box.appendChild(label);
+  });
+  const score = document.createElement('div'); score.className = 'match-score';
+  const hasScore = match.home_score !== null && match.home_score !== undefined && match.away_score !== null && match.away_score !== undefined;
+  score.textContent = hasScore ? `${match.home_score} - ${match.away_score}` : 'VS';
+  teams.append(home,score,away); card.append(meta,teams); return card;
+}
+function renderGroupedMatches(container, matches) {
+  container.innerHTML = '';
+  if (!matches.length) { container.innerHTML = '<div class="match-empty">Aucune rencontre disponible dans cette catégorie pour cette date.</div>'; return; }
+  const grouped = {};
+  matches.forEach(match => {
+    const country = match.country || 'Autres pays'; const league = match.league || 'Championnat inconnu';
+    if (!grouped[country]) grouped[country] = {};
+    if (!grouped[country][league]) grouped[country][league] = [];
+    grouped[country][league].push(match);
+  });
+  Object.keys(grouped).sort().forEach(country => {
+    const countryTitle = document.createElement('div'); countryTitle.className = 'country-title'; countryTitle.textContent = `🌍 ${country}`; container.appendChild(countryTitle);
+    Object.keys(grouped[country]).sort().forEach(league => {
+      const leagueTitle = document.createElement('div'); leagueTitle.className = 'league-title'; leagueTitle.textContent = `🏆 ${league}`; container.appendChild(leagueTitle);
+      grouped[country][league].forEach(match => container.appendChild(createMatchCard(match)));
     });
+  });
 }
-
-
-/* =========================================
-   IDENTIFIANT DU CHAMPIONNAT
-========================================= */
-
-function getLeagueKey(match) {
-    return String(match.league_id ?? match.league ?? '');
-}
-
-
-/* =========================================
-   AFFICHAGE DES MATCHS
-========================================= */
-
 function displayMatches() {
-    if (!matchesContainer) return;
-
-    const selectedCountry = countryFilter.value;
-    const selectedLeague = leagueFilter.value;
-
-    const filtered = allMatches.filter(match => {
-        const countryOK =
-            !selectedCountry || match.country === selectedCountry;
-
-        const leagueOK =
-            !selectedLeague ||
-            getLeagueKey(match) === selectedLeague;
-
-        return countryOK && leagueOK;
-    });
-
-    filtered.sort((a, b) => {
-        return new Date(a.match_date) - new Date(b.match_date);
-    });
-
-    matchesContainer.innerHTML = '';
-
-    if (filtered.length === 0) {
-        matchesContainer.innerHTML = `
-            <div class="match-empty">
-                Aucun match disponible pour cette sélection.
-            </div>
-        `;
-        return;
-    }
-
-    const grouped = {};
-
-    filtered.forEach(match => {
-        const country = match.country || 'Autres pays';
-        const league = match.league || 'Championnat inconnu';
-
-        if (!grouped[country]) {
-            grouped[country] = {};
-        }
-
-        if (!grouped[country][league]) {
-            grouped[country][league] = [];
-        }
-
-        grouped[country][league].push(match);
-    });
-
-    Object.keys(grouped).sort().forEach(country => {
-        const countryTitle = document.createElement('div');
-
-        countryTitle.className = 'country-title';
-        countryTitle.textContent = '🌍 ' + country;
-
-        matchesContainer.appendChild(countryTitle);
-
-        Object.keys(grouped[country]).sort().forEach(league => {
-            const leagueTitle = document.createElement('div');
-
-            leagueTitle.className = 'league-title';
-            leagueTitle.textContent = '🏆 ' + league;
-
-            matchesContainer.appendChild(leagueTitle);
-
-            grouped[country][league].forEach(match => {
-                const homeScore = match.home_score;
-                const awayScore = match.away_score;
-
-                const hasScore =
-                    homeScore !== null &&
-                    homeScore !== undefined &&
-                    awayScore !== null &&
-                    awayScore !== undefined;
-
-                const score = hasScore
-                    ? `${homeScore} - ${awayScore}`
-                    : 'VS';
-
-                const homeLogo = match.home_logo
-                    ? `<img src="${escapeMatchText(match.home_logo)}"
-                        alt=""
-                        loading="lazy"
-                        onerror="this.style.display='none'">`
-                    : '';
-
-                const awayLogo = match.away_logo
-                    ? `<img src="${escapeMatchText(match.away_logo)}"
-                        alt=""
-                        loading="lazy"
-                        onerror="this.style.display='none'">`
-                    : '';
-
-                const card = document.createElement('div');
-
-                card.className = 'match-card';
-
-                card.innerHTML = `
-                    <div class="match-meta">
-                        <span>🕒 ${formatMatchTime(match.match_date)}</span>
-                        <span>${escapeMatchText(
-                            translateMatchStatus(match.status)
-                        )}</span>
-                    </div>
-
-                    <div class="match-teams">
-
-                        <div class="match-team">
-                            ${homeLogo}
-                            <span>${escapeMatchText(match.home_team)}</span>
-                        </div>
-
-                        <div class="match-score">
-                            ${escapeMatchText(score)}
-                        </div>
-
-                        <div class="match-team">
-                            ${awayLogo}
-                            <span>${escapeMatchText(match.away_team)}</span>
-                        </div>
-
-                    </div>
-                `;
-
-                matchesContainer.appendChild(card);
-            });
-        });
-    });
+  if (!matchesContainer) return;
+  const selectedCountry = countryFilter.value; const selectedLeague = leagueFilter.value;
+  const filtered = allMatches.filter(match => {
+    const countryOK = !selectedCountry || match.country === selectedCountry;
+    const leagueOK = !selectedLeague || getLeagueKey(match) === selectedLeague;
+    return countryOK && leagueOK && getCategory(match) === selectedMatchStatus;
+  }).sort((a,b) => new Date(a.match_date) - new Date(b.match_date));
+  renderGroupedMatches(matchesContainer,filtered);
 }
-
-
-/* =========================================
-   FILTRE DES PAYS
-========================================= */
-
 function updateCountryFilter() {
-    const previousCountry = countryFilter.value;
-
-    const countries = [...new Set(
-        allMatches
-            .map(match => match.country)
-            .filter(Boolean)
-    )].sort();
-
-    countryFilter.innerHTML =
-        '<option value="">Tous les pays</option>';
-
-    countries.forEach(country => {
-        countryFilter.add(new Option(country, country));
-    });
-
-    if (countries.includes(previousCountry)) {
-        countryFilter.value = previousCountry;
-    }
+  const previous = countryFilter.value;
+  const countries = [...new Set(allMatches.map(match => match.country).filter(Boolean))].sort();
+  countryFilter.innerHTML = '<option value="">Tous les pays</option>';
+  countries.forEach(country => countryFilter.add(new Option(country,country)));
+  if (countries.includes(previous)) countryFilter.value = previous;
 }
-
-
-/* =========================================
-   FILTRE DES CHAMPIONNATS
-========================================= */
-
 function updateLeagueFilter() {
-    const previousLeague = leagueFilter.value;
-    const selectedCountry = countryFilter.value;
-
-    const availableMatches = allMatches.filter(match => {
-        return !selectedCountry ||
-            match.country === selectedCountry;
-    });
-
-    const leagues = [
-        ...new Map(
-            availableMatches.map(match => [
-                getLeagueKey(match),
-                {
-                    id: getLeagueKey(match),
-                    name: match.league,
-                    country: match.country
-                }
-            ])
-        ).values()
-    ].filter(league => league.id);
-
-    leagues.sort((a, b) => {
-        return String(a.name).localeCompare(String(b.name));
-    });
-
-    leagueFilter.innerHTML =
-        '<option value="">Tous les championnats</option>';
-
-    leagues.forEach(league => {
-        const label = league.country
-            ? `${league.name} · ${league.country}`
-            : league.name;
-
-        leagueFilter.add(new Option(label, league.id));
-    });
-
-    if (leagues.some(league => league.id === previousLeague)) {
-        leagueFilter.value = previousLeague;
-    }
+  const previous = leagueFilter.value; const selectedCountry = countryFilter.value;
+  const available = allMatches.filter(match => !selectedCountry || match.country === selectedCountry);
+  const leagues = [...new Map(available.map(match => [getLeagueKey(match),{id:getLeagueKey(match),name:match.league,country:match.country}])).values()].filter(item => item.id);
+  leagues.sort((a,b) => String(a.name).localeCompare(String(b.name)));
+  leagueFilter.innerHTML = '<option value="">Tous les championnats</option>';
+  leagues.forEach(item => leagueFilter.add(new Option(item.country ? `${item.name} · ${item.country}` : item.name,item.id)));
+  if (leagues.some(item => item.id === previous)) leagueFilter.value = previous;
 }
-
-
-/* =========================================
-   RÉCEPTION DES DONNÉES FOOTBALL
-========================================= */
-
 function useFootballData(data) {
-    allMatches = Array.isArray(data.response)
-        ? data.response
-        : [];
-
-    updateCountryFilter();
-    updateLeagueFilter();
-    displayMatches();
-
-    if (matchesStatus) {
-        const received =
-            data.total_matches_received ?? allMatches.length;
-
-        let message =
-            `${allMatches.length} matchs retenus sur ${received} reçus`;
-
-        const saved = data.database_sync?.saved_matches;
-
-        if (saved !== undefined) {
-            message += ` · ${saved} enregistrés dans la base`;
-        }
-
-        matchesStatus.textContent = message;
-    }
+  allMatches = Array.isArray(data.response) ? data.response : [];
+  updateCounts(); updateCountryFilter(); updateLeagueFilter(); displayMatches();
+  const received = data.total_matches_received ?? allMatches.length;
+  let message = `${allMatches.length} matchs retenus sur ${received} reçus`;
+  if (data.database_sync?.saved_matches !== undefined) message += ` · ${data.database_sync.saved_matches} enregistrés dans la base`;
+  matchesStatus.textContent = message;
 }
-
-
-/* =========================================
-   CHARGEMENT DES MATCHS
-========================================= */
-
 async function loadFootballMatches(forceRefresh = false) {
-    if (!matchesContainer || loadingMatches) return;
-
-    const selectedDate = matchDate.value || getAbidjanDate();
-
-    const cacheKey = `dani_matches_${selectedDate}`;
-    const cacheDuration = 5 * 60 * 1000;
-
-    let cachedData = null;
-
-    try {
-        const savedCache = localStorage.getItem(cacheKey);
-
-        if (savedCache) {
-            cachedData = JSON.parse(savedCache);
-
-            const cacheIsValid =
-                Date.now() - cachedData.timestamp < cacheDuration;
-
-            if (
-                cacheIsValid &&
-                !forceRefresh &&
-                cachedData.data?.success === true
-            ) {
-                useFootballData(cachedData.data);
-                lastLoadedDate = selectedDate;
-
-                matchesStatus.textContent += ' · Données en cache';
-
-                return;
-            }
-        }
-    } catch (error) {
-        console.log('Cache indisponible.');
+  if (loadingMatches) return;
+  const selectedDate = matchDate.value || getAbidjanDate();
+  const cacheKey = `dani_matches_${selectedDate}`; const cacheDuration = 5 * 60 * 1000;
+  let cachedData = null;
+  try {
+    const saved = localStorage.getItem(cacheKey);
+    if (saved) {
+      cachedData = JSON.parse(saved);
+      if (Date.now() - cachedData.timestamp < cacheDuration && !forceRefresh && cachedData.data?.success === true) {
+        useFootballData(cachedData.data); lastLoadedDate = selectedDate; matchesStatus.textContent += ' · Cache 5 min'; return;
+      }
     }
-
-    loadingMatches = true;
-
-    matchesContainer.innerHTML = `
-        <div class="match-empty">
-            Chargement des matchs...
-        </div>
-    `;
-
-    matchesStatus.textContent =
-        'Connexion aux données football...';
-
-    try {
-        const url =
-            `/.netlify/functions/fixtures?date=${encodeURIComponent(selectedDate)}`;
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || data.success !== true) {
-            throw new Error(
-                data.error || 'Impossible de charger les matchs.'
-            );
-        }
-
-        useFootballData(data);
-
-        lastLoadedDate = selectedDate;
-
-        try {
-            localStorage.setItem(cacheKey, JSON.stringify({
-                timestamp: Date.now(),
-                data: data
-            }));
-        } catch (error) {
-            console.log('Cache non sauvegardé.');
-        }
-
-    } catch (error) {
-        console.error('Erreur football :', error);
-
-        if (cachedData?.data?.success === true) {
-            useFootballData(cachedData.data);
-
-            matchesStatus.textContent =
-                'Données précédemment enregistrées.';
-        } else {
-            matchesContainer.innerHTML = `
-                <div class="match-empty">
-                    Impossible de charger les matchs actuellement.
-                    <br><br>
-                    Vérifie ta connexion et réessaie.
-                </div>
-            `;
-
-            matchesStatus.textContent =
-                'Erreur de chargement des matchs.';
-        }
-
-    } finally {
-        loadingMatches = false;
-    }
+  } catch (error) { console.log('Cache indisponible.'); }
+  loadingMatches = true;
+  matchesContainer.innerHTML = '<div class="match-empty">Chargement des rencontres...</div>';
+  matchesStatus.textContent = 'Connexion aux données football...';
+  try {
+    const response = await fetch(`/.netlify/functions/fixtures?date=${encodeURIComponent(selectedDate)}`,{method:'GET',headers:{Accept:'application/json'}});
+    const data = await response.json();
+    if (!response.ok || data.success !== true) throw new Error(data.message || data.error || 'Impossible de charger les matchs.');
+    useFootballData(data); lastLoadedDate = selectedDate;
+    try { localStorage.setItem(cacheKey,JSON.stringify({timestamp:Date.now(),data})); } catch (error) { console.log('Cache non sauvegardé.'); }
+  } catch (error) {
+    console.error('Erreur football :',error);
+    if (cachedData?.data?.success === true) { useFootballData(cachedData.data); matchesStatus.textContent = 'Données précédemment enregistrées (cache).'; }
+    else { matchesContainer.innerHTML = '<div class="match-empty">Impossible de charger les rencontres. Vérifie ta connexion et réessaie.</div>'; matchesStatus.textContent = 'Erreur de chargement des matchs.'; }
+  } finally { loadingMatches = false; }
 }
 
+const rubricDefinitions = {
+  safe:{title:'Pronos sûrs',description:'Rencontres à examiner avant toute éventuelle sélection.',warning:'Aucun pari n’est sûr. Les matchs ci-dessous sont des rencontres à analyser, pas des pronostics validés. Les statistiques et les cotes ne sont pas encore connectées.'},
+  coupon:{title:'Meilleur coupon total',description:'Préparation d’une combinaison après contrôle des données.',warning:'Aucun coupon n’est proposé pour le moment : il faut d’abord disposer de statistiques réelles et de cotes bookmakers vérifiées.'},
+  combined:{title:'Matchs combinés',description:'Rencontres disponibles pour une éventuelle étude combinée.',warning:'La liste présente les matchs à venir. Elle ne constitue pas une recommandation de mise ni un coupon automatique.'},
+  top5:{title:'Top 5 du jour',description:'Les cinq prochaines rencontres programmées à examiner.',warning:'Il s’agit des cinq horaires les plus proches, et non d’un classement de cinq pronostics gagnants.'},
+  odds:{title:'Cote 50+ du dimanche',description:'Rubrique réservée aux cotes réelles et vérifiables.',warning:'Aucune cote bookmaker n’est actuellement connectée. Aucune cote 50+ ne sera inventée ; la rubrique restera indisponible tant que la source de cotes n’est pas intégrée.'},
+  goals:{title:'Plus / moins de buts',description:'Rencontres à étudier pour les marchés de buts.',warning:'Les statistiques de buts, formes récentes et historiques nécessaires ne sont pas encore connectés. Aucun seuil Plus/Moins ne sera fabriqué.'},
+  single:{title:'Match simple',description:'Étude d’une rencontre à la fois.',warning:'Les rencontres ci-dessous sont réelles, mais aucune recommandation de pari ne sera publiée sans données statistiques suffisantes.'},
+  exact:{title:'Score exact',description:'Rubrique d’estimation des scores.',warning:'Le score exact est très incertain. Il n’y a pas encore de modèle statistique connecté ; aucun score prédit ne sera inventé.'}
+};
+function openRubric(key) {
+  const rubric = rubricDefinitions[key]; if (!rubric) return;
+  document.getElementById('rubricPageTitle').textContent = rubric.title;
+  document.getElementById('rubricHeading').textContent = rubric.title;
+  document.getElementById('rubricDescription').textContent = rubric.description;
+  document.getElementById('rubricWarning').textContent = rubric.warning;
+  const container = document.getElementById('rubricMatches');
+  let upcoming = allMatches.filter(match => getCategory(match) === 'upcoming').sort((a,b) => new Date(a.match_date) - new Date(b.match_date));
+  let shown = key === 'top5' ? upcoming.slice(0,5) : upcoming;
+  if (key === 'odds' && shown.length) {
+    document.getElementById('rubricCount').textContent = 'Rencontres à venir disponibles : ' + shown.length + ' · cotes non disponibles';
+  } else {
+    document.getElementById('rubricCount').textContent = shown.length + ' rencontre(s) à venir pour cette date.';
+  }
+  renderGroupedMatches(container,shown);
+  showView('rubric');
+}
 
-/* =========================================
-   ÉVÉNEMENTS DES FILTRES
-========================================= */
-
-countryFilter.addEventListener('change', () => {
-    updateLeagueFilter();
-    displayMatches();
-});
-
-leagueFilter.addEventListener('change', displayMatches);
-
-matchDate.addEventListener('change', () => {
-    loadFootballMatches(true);
-});
-
-
-/* =========================================
-   DÉMARRAGE DU SITE
-========================================= */
-
+countryFilter.addEventListener('change',() => { updateLeagueFilter(); displayMatches(); });
+leagueFilter.addEventListener('change',displayMatches);
+matchDate.addEventListener('change',() => { lastLoadedDate = ''; loadFootballMatches(true); });
 matchDate.value = getAbidjanDate();
-
 loadFootballMatches();
-
-</script> </body>  
+</script>
+</body>
 </html>
