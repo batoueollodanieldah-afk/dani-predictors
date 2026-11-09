@@ -216,7 +216,7 @@ if (!league?.name) return;
 
 const country = league.country || "International";
 
-const key = ${league.id || ""}|${normalize(country)}|${normalize(league.name)};
+const key = `${league.id || ""}|${normalize(country)}|${normalize(league.name)}`;
 
 const competition = competitionMap.get(key) || {
 league_id: league.id || null,
