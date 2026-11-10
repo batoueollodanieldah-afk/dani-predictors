@@ -3,8 +3,8 @@ const MAX_PREDICTIONS_PER_RUN = 5;
 const MIN_DAILY_REMAINING = 20;
 const RETRY_DELAY_HOURS = 6;
 const MIN_KICKOFF_MINUTES = 90;
-const MIN_PROBABILITY = 75;
-const MIN_MARGIN = 15;
+const MIN_PROBABILITY = 65;
+const MIN_MARGIN = 10;
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
