@@ -28,7 +28,9 @@ exports.handler = async function (event) {
 
   function validDate(value) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return false;
+
     const parsed = new Date(`${value}T00:00:00Z`);
+
     return !Number.isNaN(parsed.getTime()) &&
       parsed.toISOString().slice(0, 10) === value;
   }
@@ -42,6 +44,7 @@ exports.handler = async function (event) {
     }).formatToParts(new Date());
 
     const values = {};
+
     parts.forEach(part => {
       values[part.type] = part.value;
     });
@@ -51,9 +54,10 @@ exports.handler = async function (event) {
 
   try {
     const params = new URLSearchParams({
-      select: "id,match_id,prediction,confidence,analysis,status,published,created_at,result,settled_at,matches!predictions_match_id_fkey!inner(home_team,away_team,league,country,match_date,home_score,away_score,status)",
+      select: "id,match_id,prediction,confidence,probability_home,probability_draw,probability_away,analysis,model_version,status,published,created_at,result,settled_at,matches!predictions_match_id_fkey!inner(home_team,away_team,league,country,match_date,home_score,away_score,status,provider)",
       published: "eq.true",
       status: "eq.published",
+      "matches.provider": "eq.highlightly",
       order: "created_at.desc",
       limit: "100"
     });
@@ -62,14 +66,9 @@ exports.handler = async function (event) {
 
     if (!history) {
       const requestedDate = event.queryStringParameters?.date;
-      const date = validDate(requestedDate)
-        ? requestedDate
-        : abidjanDate();
+      const date = validDate(requestedDate) ? requestedDate : abidjanDate();
 
-      params.append(
-        "matches.match_date",
-        `gte.${date}T00:00:00Z`
-      );
+      params.append("matches.match_date", `gte.${date}T00:00:00Z`);
 
       params.append(
         "matches.match_date",
@@ -93,6 +92,7 @@ exports.handler = async function (event) {
 
     if (!response.ok) {
       const errorText = await response.text();
+
       console.error("Lecture Supabase des pronostics :", errorText);
 
       return jsonResponse(502, {
@@ -109,6 +109,7 @@ exports.handler = async function (event) {
         : row.matches;
 
       const clean = { ...row, match };
+
       delete clean.matches;
 
       return clean;
