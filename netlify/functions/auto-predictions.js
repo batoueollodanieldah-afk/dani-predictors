@@ -1,12 +1,11 @@
-const API_BASE = "https://v3.football.api-sports.io";
-const MAX_PREDICTIONS_PER_RUN = 5;
-const MIN_DAILY_REMAINING = 20;
+const HIGHLIGHTLY_BASE = "https://soccer.highlightly.net";
+const MAX_CANDIDATES_PER_RUN = 8;
 const RETRY_DELAY_HOURS = 6;
 const MIN_KICKOFF_MINUTES = 90;
-const MIN_PROBABILITY = 65;
-const MIN_MARGIN = 10;
-
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+const MIN_RECENT_GAMES = 4;
+const MIN_CANDIDATE_PROBABILITY = 60;
+const MIN_CANDIDATE_MARGIN = 10;
+const MODEL_VERSION = "DANI-FORM-POISSON-1.0";
 
 function abidjanDate(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -15,8 +14,12 @@ function abidjanDate(date = new Date()) {
     month: "2-digit",
     day: "2-digit"
   }).formatToParts(date);
+
   const values = {};
-  parts.forEach(part => { values[part.type] = part.value; });
+  parts.forEach(part => {
+    values[part.type] = part.value;
+  });
+
   return `${values.year}-${values.month}-${values.day}`;
 }
 
@@ -26,22 +29,7 @@ function shiftDate(dateString, days) {
   return date.toISOString().slice(0, 10);
 }
 
-function normalize(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function parsePercent(value) {
-  const number = Number.parseFloat(String(value ?? "").replace("%", "").replace(",", "."));
-  return Number.isFinite(number) && number >= 0 && number <= 100 ? number : null;
-}
-
-function getSupabaseHeaders(key, extra = {}) {
+function supabaseHeaders(key, extra = {}) {
   return {
     apikey: key,
     Authorization: `Bearer ${key}`,
@@ -52,366 +40,698 @@ function getSupabaseHeaders(key, extra = {}) {
 
 async function callFixturesFunction(siteUrl, date) {
   const url = `${siteUrl.replace(/\/+$/, "")}/.netlify/functions/fixtures?date=${encodeURIComponent(date)}`;
+
   const response = await fetch(url, {
-    method: "GET",
     headers: { Accept: "application/json" }
   });
+
   const data = await response.json();
+
   if (!response.ok || data.success !== true) {
-    throw new Error(data.message || data.error || `Fonction fixtures HTTP ${response.status}`);
+    throw new Error(
+      data.message ||
+      data.error ||
+      `Fonction fixtures HTTP ${response.status}`
+    );
   }
+
   return data;
 }
 
-async function getApiUsage(apiKey) {
-  try {
-    const response = await fetch(`${API_BASE}/status`, {
-      method: "GET",
-      headers: { "x-apisports-key": apiKey }
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    const requests = data?.response?.requests;
-    if (!requests) return null;
-    const limit = Number(requests.limit_day);
-    const current = Number(requests.current);
-    if (!Number.isFinite(limit) || !Number.isFinite(current)) return null;
-    return { limit, current, remaining: Math.max(0, limit - current) };
-  } catch (error) {
-    console.warn("Impossible de lire le quota API-Football :", error.message);
-    return null;
-  }
+function parseScore(value) {
+  if (typeof value !== "string") return null;
+
+  const match = value.match(/^(\d+)\s*[-–:]\s*(\d+)$/);
+
+  if (!match) return null;
+
+  return {
+    home: Number(match[1]),
+    away: Number(match[2])
+  };
 }
 
-function diversifyFixtures(fixtures) {
-  const groups = new Map();
-  fixtures.forEach(match => {
-    const key = `${match.country || "?"}|${match.league_id || match.league || "?"}`;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(match);
-  });
-  for (const group of groups.values()) {
-    group.sort((a, b) => new Date(a.match_date) - new Date(b.match_date));
-  }
-  const selected = [];
-  const queues = [...groups.values()];
-  while (queues.some(queue => queue.length)) {
-    for (const queue of queues) {
-      if (queue.length) selected.push(queue.shift());
-    }
-  }
-  return selected;
-}
-
-async function getExistingMatchRows(supabaseUrl, supabaseKey, matchIds) {
-  if (!matchIds.length) return new Map();
-  const query = `select=match_id,published,status,attempt_count,last_attempt_at&match_id=in.(${matchIds.join(",")})`;
-  const response = await fetch(`${supabaseUrl}/rest/v1/predictions?${query}`, {
-    headers: getSupabaseHeaders(supabaseKey)
-  });
-  if (!response.ok) {
-    throw new Error(`Lecture des pronostics existants impossible : ${await response.text()}`);
-  }
-  const rows = await response.json();
-  return new Map((rows || []).map(row => [String(row.match_id), row]));
-}
-
-function makePredictionRow(match, apiItem) {
-  const prediction = apiItem?.predictions;
-  const percent = prediction?.percent || {};
-  const values = {
-    home: parsePercent(percent.home),
-    draw: parsePercent(percent.draw),
-    away: parsePercent(percent.away)
+function summarizeRecentForm(games, teamId) {
+  const summary = {
+    played: 0,
+    wins: 0,
+    draws: 0,
+    losses: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    form: []
   };
 
-  if (Object.values(values).some(value => value === null)) {
-    return {
-      match_id: match.id,
-      prediction: "Non publié — données de probabilité insuffisantes",
-      confidence: null,
-      analysis: "API-Football n'a pas fourni les trois probabilités nécessaires pour contrôler cette rencontre. Aucune sélection n'est publiée.",
-      status: "insufficient_data",
-      published: false
-    };
+  if (!Array.isArray(games)) return summary;
+
+  for (const game of games.slice(0, 5)) {
+    const score = parseScore(game?.state?.score?.current);
+
+    const homeId = Number(game?.homeTeam?.id);
+    const awayId = Number(game?.awayTeam?.id);
+    const id = Number(teamId);
+
+    if (!score || (homeId !== id && awayId !== id)) continue;
+
+    const isHome = homeId === id;
+
+    const scored = isHome ? score.home : score.away;
+    const conceded = isHome ? score.away : score.home;
+
+    summary.played += 1;
+    summary.goalsFor += scored;
+    summary.goalsAgainst += conceded;
+
+    if (scored > conceded) {
+      summary.wins += 1;
+      summary.form.push("V");
+    } else if (scored === conceded) {
+      summary.draws += 1;
+      summary.form.push("N");
+    } else {
+      summary.losses += 1;
+      summary.form.push("D");
+    }
   }
 
-  const total = values.home + values.draw + values.away;
-  const ranked = Object.entries(values).sort((a, b) => b[1] - a[1]);
-  const [bestKey, bestValue] = ranked[0];
-  const secondValue = ranked[1][1];
-  const margin = bestValue - secondValue;
-  const percentageText = `Domicile ${values.home.toFixed(1)} %, nul ${values.draw.toFixed(1)} %, extérieur ${values.away.toFixed(1)} %.`;
-
-  if (total < 85 || total > 115) {
-    return {
-      match_id: match.id,
-      prediction: "Non publié — probabilités incohérentes",
-      confidence: null,
-      analysis: `Les pourcentages reçus ne passent pas le contrôle de cohérence (total ${total.toFixed(1)} %). ${percentageText} Aucune sélection n'est publiée.`,
-      status: "insufficient_data",
-      published: false
-    };
+  if (summary.played) {
+    summary.avgGoalsFor = summary.goalsFor / summary.played;
+    summary.avgGoalsAgainst = summary.goalsAgainst / summary.played;
+    summary.pointsPerGame =
+      (summary.wins * 3 + summary.draws) / summary.played;
   }
 
-  if (bestValue < MIN_PROBABILITY || margin < MIN_MARGIN) {
-    return {
-      match_id: match.id,
-      prediction: "Non publié — seuil automatique non atteint",
-      confidence: Number(bestValue.toFixed(2)),
-      analysis: `${percentageText} La meilleure probabilité est ${bestValue.toFixed(1)} % et son avance est ${margin.toFixed(1)} point(s). Le seuil exigé est ${MIN_PROBABILITY} % avec ${MIN_MARGIN} points d'écart. Sélection écartée automatiquement.`,
-      status: "filtered",
-      published: false
-    };
+  return summary;
+}
+
+function poisson(lambda, goals) {
+  let factorial = 1;
+
+  for (let i = 2; i <= goals; i++) {
+    factorial *= i;
   }
 
-  let pick;
-  if (bestKey === "home") pick = `Victoire de ${match.home_team}`;
-  else if (bestKey === "away") pick = `Victoire de ${match.away_team}`;
-  else pick = "Match nul";
+  return Math.exp(-lambda) * Math.pow(lambda, goals) / factorial;
+}
+
+function calculateProbabilities(homeForm, awayForm) {
+  const priorGames = 5;
+  const priorGoals = 1.30;
+
+  const adjusted = form => ({
+    scored:
+      (form.goalsFor + priorGoals * priorGames) /
+      (form.played + priorGames),
+
+    conceded:
+      (form.goalsAgainst + priorGoals * priorGames) /
+      (form.played + priorGames)
+  });
+
+  const adjustedHome = adjusted(homeForm);
+  const adjustedAway = adjusted(awayForm);
+
+  const homeExpected = Math.max(
+    0.25,
+    Math.min(
+      3.5,
+      ((adjustedHome.scored + adjustedAway.conceded) / 2) * 1.05
+    )
+  );
+
+  const awayExpected = Math.max(
+    0.20,
+    Math.min(
+      3.2,
+      ((adjustedAway.scored + adjustedHome.conceded) / 2) * 0.95
+    )
+  );
+
+  let home = 0;
+  let draw = 0;
+  let away = 0;
+
+  for (let h = 0; h <= 8; h++) {
+    for (let a = 0; a <= 8; a++) {
+      const probability =
+        poisson(homeExpected, h) * poisson(awayExpected, a);
+
+      if (h > a) home += probability;
+      else if (h === a) draw += probability;
+      else away += probability;
+    }
+  }
+
+  const total = home + draw + away;
+
+  return {
+    home: home / total * 100,
+    draw: draw / total * 100,
+    away: away / total * 100,
+    homeExpected,
+    awayExpected
+  };
+}
+
+function getPredictionText(match, key) {
+  if (key === "home") {
+    return `Victoire de ${match.home_team}`;
+  }
+
+  if (key === "away") {
+    return `Victoire de ${match.away_team}`;
+  }
+
+  return "Match nul";
+}
+
+function buildCandidate(match, homeForm, awayForm) {
+  const probabilities = calculateProbabilities(homeForm, awayForm);
+
+  const ranked = [
+    ["home", probabilities.home],
+    ["draw", probabilities.draw],
+    ["away", probabilities.away]
+  ].sort((a, b) => b[1] - a[1]);
+
+  const best = ranked[0];
+  const margin = best[1] - ranked[1][1];
+
+  const percentage = value => `${value.toFixed(1)} %`;
+  const formText = form => form.form.join("-") || "indisponible";
+
+  const analysis = [
+    `Modèle statistique interne ${MODEL_VERSION}, fondé sur les ${homeForm.played} derniers matchs terminés de ${match.home_team} et les ${awayForm.played} derniers de ${match.away_team}.`,
+
+    `Forme récente : ${match.home_team} ${formText(homeForm)} (${homeForm.wins}V ${homeForm.draws}N ${homeForm.losses}D) ; ${match.away_team} ${formText(awayForm)} (${awayForm.wins}V ${awayForm.draws}N ${awayForm.losses}D).`,
+
+    `Buts moyens : ${match.home_team} ${homeForm.avgGoalsFor.toFixed(2)} marqués / ${homeForm.avgGoalsAgainst.toFixed(2)} encaissés ; ${match.away_team} ${awayForm.avgGoalsFor.toFixed(2)} marqués / ${awayForm.avgGoalsAgainst.toFixed(2)} encaissés.`,
+
+    `Estimation interne 1X2 : domicile ${percentage(probabilities.home)}, nul ${percentage(probabilities.draw)}, extérieur ${percentage(probabilities.away)}. Buts attendus du modèle : ${probabilities.homeExpected.toFixed(2)} – ${probabilities.awayExpected.toFixed(2)}.`,
+
+    `La sélection proposée est ${getPredictionText(match, best[0])} (${percentage(best[1])}), avec ${percentage(margin)} d'avance sur la deuxième issue. Cette estimation est indicative, issue d'un échantillon court et ne garantit aucun résultat. Elle est publiée automatiquement uniquement si les seuils de qualité du modèle sont atteints.`
+  ].join(" ");
+
+  const qualifies =
+    best[1] >= MIN_CANDIDATE_PROBABILITY &&
+    margin >= MIN_CANDIDATE_MARGIN;
 
   return {
     match_id: match.id,
-    prediction: pick,
-    confidence: Number(bestValue.toFixed(2)),
-    analysis: `Prévision issue de l'endpoint Predictions d'API-Football. ${percentageText} La meilleure issue atteint ${bestValue.toFixed(1)} % et dépasse la deuxième de ${margin.toFixed(1)} points. Publication automatique après contrôle. Il s'agit d'une estimation, pas d'une garantie.`,
-    status: "published",
-    published: true
+    prediction: getPredictionText(match, best[0]),
+    confidence: Number(best[1].toFixed(2)),
+    probability_home: Number(probabilities.home.toFixed(2)),
+    probability_draw: Number(probabilities.draw.toFixed(2)),
+    probability_away: Number(probabilities.away.toFixed(2)),
+    analysis,
+    model_version: MODEL_VERSION,
+    status: qualifies ? "published" : "filtered",
+    published: qualifies
   };
 }
 
-async function requestFixturePrediction(apiKey, fixtureId) {
-  const response = await fetch(`${API_BASE}/predictions?fixture=${encodeURIComponent(fixtureId)}`, {
-    method: "GET",
-    headers: { "x-apisports-key": apiKey }
+async function fetchLastFive(apiKey, teamId) {
+  const url = new URL(`${HIGHLIGHTLY_BASE}/last-five-games`);
+
+  url.searchParams.set("teamId", String(teamId));
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      "x-rapidapi-key": apiKey,
+      Accept: "application/json"
+    }
   });
 
-  if (response.status === 429) {
-    return { retryable: true, error: "Limite de requêtes par minute atteinte." };
-  }
+  let data;
 
-  let data = {};
-  try { data = await response.json(); } catch (error) {}
+  try {
+    data = await response.json();
+  } catch (error) {
+    data = null;
+  }
 
   if (!response.ok) {
-    return { retryable: true, error: `API-Football HTTP ${response.status}` };
+    const message =
+      data?.message ||
+      data?.error ||
+      `Highlightly HTTP ${response.status}`;
+
+    const retryable =
+      response.status === 429 ||
+      response.status >= 500;
+
+    return {
+      retryable,
+      error: message,
+      games: []
+    };
   }
 
-  if (data?.errors && Object.keys(data.errors).length) {
-    const errorText = JSON.stringify(data.errors);
-    if (/rate.?limit|quota|too many/i.test(errorText)) {
-      return { retryable: true, error: errorText };
+  return {
+    retryable: false,
+    games: Array.isArray(data) ? data : []
+  };
+}
+
+async function getExistingRows(supabaseUrl, supabaseKey, matchIds) {
+  if (!matchIds.length) return new Map();
+
+  const query = new URLSearchParams({
+    select: "match_id,status,published,attempt_count,last_attempt_at",
+    match_id: `in.(${matchIds.join(",")})`
+  });
+
+  const response = await fetch(
+    `${supabaseUrl}/rest/v1/predictions?${query}`,
+    {
+      headers: supabaseHeaders(supabaseKey)
     }
-    return { row: null, error: errorText };
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Lecture des analyses existantes impossible : ${await response.text()}`
+    );
   }
 
-  const item = Array.isArray(data?.response) ? data.response[0] : null;
-  return { row: item || null };
+  const rows = await response.json();
+
+  return new Map(
+    (rows || []).map(row => [String(row.match_id), row])
+  );
+}
+
+async function saveRows(supabaseUrl, supabaseKey, rows) {
+  if (!rows.length) return;
+
+  const response = await fetch(
+    `${supabaseUrl}/rest/v1/predictions?on_conflict=match_id`,
+    {
+      method: "POST",
+      headers: supabaseHeaders(supabaseKey, {
+        Prefer: "resolution=merge-duplicates,return=minimal"
+      }),
+      body: JSON.stringify(rows)
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Enregistrement Supabase impossible : ${await response.text()}`
+    );
+  }
 }
 
 async function settlePreviousDay(siteUrl, supabaseUrl, supabaseKey, date) {
   try {
     await callFixturesFunction(siteUrl, date);
   } catch (error) {
-    console.warn(`Actualisation des scores du ${date} impossible :`, error.message);
+    console.warn(
+      `Actualisation des scores du ${date} impossible :`,
+      error.message
+    );
   }
 
   const start = `${date}T00:00:00Z`;
   const end = `${shiftDate(date, 1)}T00:00:00Z`;
+
   const params = new URLSearchParams({
-    select: "id,match_id,prediction,result,matches!predictions_match_id_fkey!inner(home_team,away_team,home_score,away_score,status,match_date)",
+    select: "id,match_id,prediction,result,matches!predictions_match_id_fkey!inner(home_team,away_team,home_score,away_score,status,match_date,provider)",
     published: "eq.true",
     status: "eq.published",
     result: "is.null",
     "matches.match_date": `gte.${start}`,
+    "matches.provider": "eq.highlightly",
     order: "created_at.asc",
     limit: "100"
   });
+
   params.append("matches.match_date", `lt.${end}`);
 
-  const response = await fetch(`${supabaseUrl}/rest/v1/predictions?${params.toString()}`, {
-    headers: getSupabaseHeaders(supabaseKey)
-  });
+  const response = await fetch(
+    `${supabaseUrl}/rest/v1/predictions?${params}`,
+    {
+      headers: supabaseHeaders(supabaseKey)
+    }
+  );
+
   if (!response.ok) {
-    console.warn("Lecture des pronostics à régler impossible :", await response.text());
+    console.warn(
+      "Lecture des pronostics à régler impossible :",
+      await response.text()
+    );
+
     return { settled: 0 };
   }
 
   const rows = await response.json();
-  const updates = { won: [], lost: [], void: [] };
+
+  const updates = {
+    won: [],
+    lost: [],
+    void: []
+  };
 
   for (const row of rows || []) {
-    const match = Array.isArray(row.matches) ? row.matches[0] : row.matches;
+    const match = Array.isArray(row.matches)
+      ? row.matches[0]
+      : row.matches;
+
     if (!match) continue;
+
     const status = String(match.status || "").toUpperCase();
 
     if (["PST", "CANC", "ABD", "AWD", "WO"].includes(status)) {
       updates.void.push(row.id);
       continue;
     }
+
     if (!["FT", "AET", "PEN"].includes(status)) continue;
+
+    if (
+      match.home_score === null ||
+      match.home_score === undefined ||
+      match.away_score === null ||
+      match.away_score === undefined
+    ) continue;
 
     const homeScore = Number(match.home_score);
     const awayScore = Number(match.away_score);
-    if (!Number.isFinite(homeScore) || !Number.isFinite(awayScore)) continue;
+
+    if (
+      !Number.isFinite(homeScore) ||
+      !Number.isFinite(awayScore)
+    ) continue;
 
     const pick = String(row.prediction || "");
-    let won = null;
 
-    if (normalize(pick) === "match nul") {
+    let won = false;
+
+    if (pick.startsWith("Victoire de ")) {
+      const winner =
+        homeScore > awayScore
+          ? "home"
+          : awayScore > homeScore
+            ? "away"
+            : "draw";
+
+      const expected = pick.slice("Victoire de ".length);
+
+      const actual =
+        winner === "home"
+          ? "home"
+          : winner === "away"
+            ? "away"
+            : "draw";
+
+      won =
+        (actual === "home" && expected === match.home_team) ||
+        (actual === "away" && expected === match.away_team);
+
+    } else if (pick === "Match nul") {
       won = homeScore === awayScore;
-    } else if (pick.startsWith("Victoire de ")) {
-      const team = normalize(pick.slice("Victoire de ".length));
-      if (team === normalize(match.home_team)) won = homeScore > awayScore;
-      else if (team === normalize(match.away_team)) won = awayScore > homeScore;
     }
 
-    if (won === true) updates.won.push(row.id);
-    else if (won === false) updates.lost.push(row.id);
+    updates[won ? "won" : "lost"].push(row.id);
   }
 
   let settled = 0;
+
   for (const [result, ids] of Object.entries(updates)) {
-    if (!ids.length) continue;
-    const idList = ids.join(",");
-    const patch = await fetch(`${supabaseUrl}/rest/v1/predictions?id=in.(${idList})&result=is.null`, {
-      method: "PATCH",
-      headers: getSupabaseHeaders(supabaseKey, { Prefer: "return=minimal" }),
-      body: JSON.stringify({ result, settled_at: new Date().toISOString() })
-    });
-    if (patch.ok) settled += ids.length;
-    else console.warn(`Mise à jour des résultats (${result}) impossible :`, await patch.text());
+    for (let i = 0; i < ids.length; i += 50) {
+      const batch = ids.slice(i, i + 50);
+
+      const patch = await fetch(
+        `${supabaseUrl}/rest/v1/predictions?id=in.(${batch.join(",")})&result=is.null`,
+        {
+          method: "PATCH",
+          headers: supabaseHeaders(supabaseKey, {
+            Prefer: "return=minimal"
+          }),
+          body: JSON.stringify({
+            result,
+            settled_at: new Date().toISOString()
+          })
+        }
+      );
+
+      if (patch.ok) {
+        settled += batch.length;
+      } else {
+        console.warn(
+          `Mise à jour des résultats (${result}) impossible :`,
+          await patch.text()
+        );
+      }
+    }
   }
 
-  console.log(`Résultats du ${date} réglés : ${settled}`);
   return { settled };
 }
 
 exports.handler = async function () {
-  const apiKey = process.env.API_FOOTBALL_KEY;
-  const supabaseUrl = (process.env.SUPABASE_URL || "").replace(/\/+$/, "");
+  const apiKey = process.env.HIGHLIGHTLY_API_KEY;
+
+  const supabaseUrl =
+    (process.env.SUPABASE_URL || "").replace(/\/+$/, "");
+
   const supabaseKey = process.env.SUPABASE_SECRET_KEY;
-  const siteUrl = process.env.URL || process.env.DEPLOY_PRIME_URL || "https://jocular-valkyrie-193e08.netlify.app";
+
+  const siteUrl =
+    process.env.URL ||
+    process.env.DEPLOY_PRIME_URL ||
+    "https://jocular-valkyrie-193e08.netlify.app";
 
   if (!apiKey || !supabaseUrl || !supabaseKey) {
-    console.error("Variables API_FOOTBALL_KEY, SUPABASE_URL ou SUPABASE_SECRET_KEY manquantes.");
-    return { statusCode: 500, body: "Configuration serveur incomplète." };
+    console.error(
+      "Variables HIGHLIGHTLY_API_KEY, SUPABASE_URL ou SUPABASE_SECRET_KEY manquantes."
+    );
+
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        success: false,
+        error: "Configuration serveur incomplète."
+      })
+    };
   }
 
   try {
     const today = abidjanDate();
-    const hourUtc = new Date().getUTCHours();
+    const now = Date.now();
+
     let settlement = { settled: 0 };
 
-    if (hourUtc === 5) {
-      const yesterday = shiftDate(today, -1);
-      settlement = await settlePreviousDay(siteUrl, supabaseUrl, supabaseKey, yesterday);
+    if (new Date().getUTCHours() === 5) {
+      settlement = await settlePreviousDay(
+        siteUrl,
+        supabaseUrl,
+        supabaseKey,
+        shiftDate(today, -1)
+      );
     }
 
-    const usage = await getApiUsage(apiKey);
-    if (usage && usage.remaining < MIN_DAILY_REMAINING) {
-      console.log(`Génération suspendue : ${usage.remaining} requêtes API-Football restantes.`);
-      return { statusCode: 200, body: JSON.stringify({ success: true, generated: 0, reason: "quota réservé", settlement }) };
-    }
-
-    const fixturesData = await callFixturesFunction(siteUrl, today);
-    const now = Date.now();
-    const minKickoff = now + MIN_KICKOFF_MINUTES * 60 * 1000;
+    const fixturesData = await callFixturesFunction(
+      siteUrl,
+      today
+    );
 
     const candidates = (fixturesData.response || [])
       .filter(match =>
         match &&
-        Number.isFinite(Number(match.id)) &&
-        String(match.status || "").toUpperCase() === "NS" &&
-        Date.parse(match.match_date) > minKickoff
+        Number.isSafeInteger(Number(match.id)) &&
+        Number.isSafeInteger(Number(match.home_team_id)) &&
+        Number(match.home_team_id) > 0 &&
+        Number.isSafeInteger(Number(match.away_team_id)) &&
+        Number(match.away_team_id) > 0 &&
+        match.provider === "highlightly" &&
+        match.status === "NS" &&
+        Date.parse(match.match_date) >
+          now + MIN_KICKOFF_MINUTES * 60000
       )
-      .sort((a, b) => new Date(a.match_date) - new Date(b.match_date));
+      .sort(
+        (a, b) =>
+          new Date(a.match_date) - new Date(b.match_date)
+      );
 
-    const diversified = diversifyFixtures(candidates).slice(0, 200);
-    const existingRows = await getExistingMatchRows(
+    const existingRows = await getExistingRows(
       supabaseUrl,
       supabaseKey,
-      diversified.map(match => Number(match.id))
+      candidates.map(match => Number(match.id))
     );
-    const retryDelayMs = RETRY_DELAY_HOURS * 60 * 60 * 1000;
 
-    const neverAttempted = diversified.filter(match =>
-      !existingRows.has(String(match.id))
-    );
-    const eligibleRetries = diversified.filter(match => {
-      const previous = existingRows.get(String(match.id));
-      if (!previous || previous.published === true || previous.status === "published") return false;
-      const lastAttempt = Date.parse(previous.last_attempt_at || "");
-      return !Number.isFinite(lastAttempt) || (now - lastAttempt) >= retryDelayMs;
-    });
+    const retryAfterMs = RETRY_DELAY_HOURS * 3600000;
 
-    const toProcess = [...neverAttempted, ...eligibleRetries]
-      .slice(0, MAX_PREDICTIONS_PER_RUN);
+    const eligible = candidates
+      .filter(match => {
+        const previous = existingRows.get(String(match.id));
 
-    if (!toProcess.length) {
-      console.log("Aucun nouveau match admissible à analyser.");
-      return { statusCode: 200, body: JSON.stringify({ success: true, generated: 0, settlement }) };
+        if (!previous) return true;
+
+        if (
+          previous.published === true ||
+          ["published", "pending_review", "rejected"].includes(previous.status)
+        ) {
+          return false;
+        }
+
+        const lastAttempt = Date.parse(
+          previous.last_attempt_at || ""
+        );
+
+        return (
+          !Number.isFinite(lastAttempt) ||
+          now - lastAttempt >= retryAfterMs
+        );
+      })
+      .slice(0, MAX_CANDIDATES_PER_RUN);
+
+    if (!eligible.length) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          success: true,
+          requested_date: today,
+          examined: 0,
+          published: 0,
+          reason: "Aucun nouveau match admissible pour cette exécution.",
+          settlement
+        })
+      };
+    }
+
+    const formCache = new Map();
+
+    function getForm(teamId) {
+      const key = String(teamId);
+
+      if (!formCache.has(key)) {
+        formCache.set(
+          key,
+          fetchLastFive(apiKey, teamId)
+        );
+      }
+
+      return formCache.get(key);
     }
 
     const rowsToSave = [];
-    let apiCalls = 0;
-    for (const match of toProcess) {
-      if (apiCalls > 0) await wait(1100);
-      const result = await requestFixturePrediction(apiKey, match.id);
-      apiCalls += 1;
 
-      if (result.retryable) {
-        console.warn(`Analyse interrompue pour le match ${match.id} : ${result.error}`);
-        break;
-      }
+    for (const match of eligible) {
+      const [homeResult, awayResult] = await Promise.all([
+        getForm(match.home_team_id),
+        getForm(match.away_team_id)
+      ]);
 
       const previous = existingRows.get(String(match.id));
+
       const attemptFields = {
         attempt_count: Number(previous?.attempt_count || 0) + 1,
         last_attempt_at: new Date().toISOString()
       };
 
-      if (!result.row) {
+      if (homeResult.retryable || awayResult.retryable) {
         rowsToSave.push({
           match_id: match.id,
-          prediction: "Non publié — prévision indisponible",
+          prediction: "Analyse reportée — données temporairement indisponibles",
           confidence: null,
-          analysis: `Aucune prévision exploitable n'a été retournée par API-Football pour cette rencontre. ${result.error || ""}`.trim(),
+          analysis:
+            `Highlightly n'a pas pu fournir la forme récente des deux équipes. ${homeResult.error || awayResult.error || "Réessaie ultérieurement."}`,
+          model_version: MODEL_VERSION,
           status: "insufficient_data",
           published: false,
           ...attemptFields
         });
-      } else {
-        rowsToSave.push({ ...makePredictionRow(match, result.row), ...attemptFields });
-      }
-    }
 
-    if (rowsToSave.length) {
-      const insert = await fetch(`${supabaseUrl}/rest/v1/predictions?on_conflict=match_id`, {
-        method: "POST",
-        headers: getSupabaseHeaders(supabaseKey, { Prefer: "resolution=merge-duplicates,return=minimal" }),
-        body: JSON.stringify(rowsToSave)
+        continue;
+      }
+
+      const homeForm = summarizeRecentForm(
+        homeResult.games,
+        match.home_team_id
+      );
+
+      const awayForm = summarizeRecentForm(
+        awayResult.games,
+        match.away_team_id
+      );
+
+      if (
+        homeForm.played < MIN_RECENT_GAMES ||
+        awayForm.played < MIN_RECENT_GAMES
+      ) {
+        rowsToSave.push({
+          match_id: match.id,
+          prediction: "Analyse non publiée — historique insuffisant",
+          confidence: null,
+          analysis:
+            `Historique insuffisant pour établir une estimation raisonnable. Matchs terminés disponibles : ${match.home_team} ${homeForm.played}/5 ; ${match.away_team} ${awayForm.played}/5. Aucun pronostic n'est proposé.`,
+          model_version: MODEL_VERSION,
+          status: "insufficient_data",
+          published: false,
+          ...attemptFields
+        });
+
+        continue;
+      }
+
+      rowsToSave.push({
+        ...buildCandidate(match, homeForm, awayForm),
+        ...attemptFields
       });
-      if (!insert.ok) {
-        throw new Error(`Enregistrement Supabase impossible : ${await insert.text()}`);
-      }
     }
 
-    const published = rowsToSave.filter(row => row.published).length;
-    console.log(`Analyse terminée : ${rowsToSave.length} matchs examinés, ${published} pronostics publiés, ${settlement.settled} résultats réglés.`);
+    await saveRows(
+      supabaseUrl,
+      supabaseKey,
+      rowsToSave
+    );
+
+    const published = rowsToSave.filter(
+      row => row.status === "published" && row.published === true
+    ).length;
+
+    const filtered = rowsToSave.filter(
+      row => row.status === "filtered"
+    ).length;
+
+    const insufficient = rowsToSave.filter(
+      row => row.status === "insufficient_data"
+    ).length;
+
+    console.log(
+      `DANI modèle ${MODEL_VERSION} : ${rowsToSave.length} analysés, ${published} publiés automatiquement, ${filtered} filtrés, ${insufficient} sans données suffisantes.`
+    );
+
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
         requested_date: today,
+        provider: "Highlightly",
+        model_version: MODEL_VERSION,
         examined: rowsToSave.length,
         published,
-        filtered_or_unavailable: rowsToSave.length - published,
-        settlement
+        filtered,
+        insufficient_data: insufficient,
+        settlement,
+        note:
+          "Publication automatique activée : seules les analyses atteignant les seuils minimums sont publiées."
       })
     };
+
   } catch (error) {
-    console.error("Erreur du moteur automatique :", error.message);
-    return { statusCode: 500, body: JSON.stringify({ success: false, error: error.message }) };
+    console.error(
+      "Erreur du moteur automatique DANI :",
+      error.message
+    );
+
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        success: false,
+        error: error.message
+      })
+    };
   }
 };
