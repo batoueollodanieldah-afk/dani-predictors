@@ -32,7 +32,6 @@ function shiftDate(dateString, days) {
 function supabaseHeaders(key, extra = {}) {
   return {
     apikey: key,
-    Authorization: `Bearer ${key}`,
     "Content-Type": "application/json",
     ...extra
   };
@@ -59,16 +58,35 @@ async function callFixturesFunction(siteUrl, date) {
 }
 
 function parseScore(value) {
-  if (typeof value !== "string") return null;
+  if (typeof value === "string") {
+    const match = value.match(/^(\d+)\s*[-–:]\s*(\d+)$/);
+    if (match) return { home: Number(match[1]), away: Number(match[2]) };
+  }
 
-  const match = value.match(/^(\d+)\s*[-–:]\s*(\d+)$/);
+  if (value && typeof value === "object") {
+    const home = Number(value.home ?? value.homeScore ?? value.home_score);
+    const away = Number(value.away ?? value.awayScore ?? value.away_score);
+    if (Number.isFinite(home) && Number.isFinite(away)) return { home, away };
+  }
 
-  if (!match) return null;
+  return null;
+}
 
-  return {
-    home: Number(match[1]),
-    away: Number(match[2])
-  };
+function isFinishedGame(game) {
+  const rawStatus = String(
+    game?.state?.description ||
+    game?.state?.shortName ||
+    game?.status?.short ||
+    game?.status ||
+    ""
+  ).trim().toLowerCase();
+
+  if (!rawStatus) return true;
+
+  return [
+    "ft", "aet", "pen", "finished", "finished after extra time",
+    "finished after penalties", "full time"
+  ].includes(rawStatus);
 }
 
 function summarizeRecentForm(games, teamId) {
@@ -84,17 +102,24 @@ function summarizeRecentForm(games, teamId) {
 
   if (!Array.isArray(games)) return summary;
 
-  for (const game of games.slice(0, 5)) {
-    const score = parseScore(game?.state?.score?.current);
+  for (const game of games.slice(0, 10)) {
+    if (!isFinishedGame(game)) continue;
 
-    const homeId = Number(game?.homeTeam?.id);
-    const awayId = Number(game?.awayTeam?.id);
+    const scoreValue =
+      game?.state?.score?.current ??
+      game?.score?.current ??
+      game?.score ??
+      game?.result ??
+      null;
+
+    const score = parseScore(scoreValue);
+    const homeId = Number(game?.homeTeam?.id ?? game?.home_team?.id ?? game?.homeTeamId);
+    const awayId = Number(game?.awayTeam?.id ?? game?.away_team?.id ?? game?.awayTeamId);
     const id = Number(teamId);
 
     if (!score || (homeId !== id && awayId !== id)) continue;
 
     const isHome = homeId === id;
-
     const scored = isHome ? score.home : score.away;
     const conceded = isHome ? score.away : score.home;
 
@@ -112,6 +137,8 @@ function summarizeRecentForm(games, teamId) {
       summary.losses += 1;
       summary.form.push("D");
     }
+
+    if (summary.played >= 5) break;
   }
 
   if (summary.played) {
@@ -246,7 +273,8 @@ function buildCandidate(match, homeForm, awayForm) {
     analysis,
     model_version: MODEL_VERSION,
     status: qualifies ? "published" : "filtered",
-    published: qualifies
+    published: qualifies,
+    is_premium: true
   };
 }
 
@@ -287,9 +315,18 @@ async function fetchLastFive(apiKey, teamId) {
     };
   }
 
+  const games =
+    Array.isArray(data) ? data :
+    Array.isArray(data?.data) ? data.data :
+    Array.isArray(data?.response) ? data.response :
+    Array.isArray(data?.results) ? data.results :
+    Array.isArray(data?.games) ? data.games :
+    Array.isArray(data?.data?.games) ? data.data.games :
+    [];
+
   return {
     retryable: false,
-    games: Array.isArray(data) ? data : []
+    games
   };
 }
 
@@ -428,25 +465,11 @@ async function settlePreviousDay(siteUrl, supabaseUrl, supabaseKey, date) {
     let won = false;
 
     if (pick.startsWith("Victoire de ")) {
-      const winner =
-        homeScore > awayScore
-          ? "home"
-          : awayScore > homeScore
-            ? "away"
-            : "draw";
-
       const expected = pick.slice("Victoire de ".length);
 
-      const actual =
-        winner === "home"
-          ? "home"
-          : winner === "away"
-            ? "away"
-            : "draw";
-
       won =
-        (actual === "home" && expected === match.home_team) ||
-        (actual === "away" && expected === match.away_team);
+        (homeScore > awayScore && expected === match.home_team) ||
+        (awayScore > homeScore && expected === match.away_team);
 
     } else if (pick === "Match nul") {
       won = homeScore === awayScore;
@@ -640,6 +663,7 @@ exports.handler = async function () {
           model_version: MODEL_VERSION,
           status: "insufficient_data",
           published: false,
+          is_premium: true,
           ...attemptFields
         });
 
@@ -669,6 +693,7 @@ exports.handler = async function () {
           model_version: MODEL_VERSION,
           status: "insufficient_data",
           published: false,
+          is_premium: true,
           ...attemptFields
         });
 
