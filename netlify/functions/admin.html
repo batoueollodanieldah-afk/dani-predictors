@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#17181e">
+<title>DANI PREDICTORS — Administration</title>
+<style>
+:root{--ink:#17181e;--muted:#737681;--gold:#c79536;--paper:#fbfaf5;--line:#e7e5e9;--green:#18764b;--red:#a33333}
+*{box-sizing:border-box}body{margin:0;background:#f2f0eb;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+main{max-width:900px;margin:0 auto;padding:18px 14px 50px}
+header{background:#17181e;color:#fff;border-bottom:3px solid var(--gold);padding:18px;border-radius:16px;margin-bottom:15px}
+header h1{margin:0;font-size:21px}header p{margin:5px 0 0;color:#ddd;font-size:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px;margin:13px 0;box-shadow:0 7px 22px #00000008}
+h2{font-size:16px;margin:0 0 12px}h3{font-size:14px;margin:0 0 8px}
+input,textarea,select{width:100%;padding:11px;border:1px solid #dcd9d1;border-radius:10px;font:inherit;font-size:13px;margin:4px 0 10px}
+label{font-size:11px;font-weight:800;color:#5c5960}
+button{border:0;border-radius:10px;padding:10px 13px;font-weight:800;font-size:12px;cursor:pointer;margin:3px}
+.primary{background:var(--gold);color:#17130b}.dark{background:#17181e;color:#f4d88e}.danger{background:#fae9e9;color:var(--red)}.muted{color:var(--muted);font-size:12px}
+.row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin:9px 0;background:#fffdf8}
+.item p{font-size:12px;margin:5px 0;overflow-wrap:anywhere}
+.badge{display:inline-block;border-radius:20px;background:#fff2d2;color:#8a621f;padding:4px 8px;font-size:10px;font-weight:900}
+#dashboard{display:none}.msg{font-size:12px;padding:10px;border-radius:9px;background:#f4f1e9;margin:8px 0;white-space:pre-wrap}.msg.error{background:#ffeded;color:var(--red)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:580px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>DANI PREDICTORS — Administration</h1><p>Gestion sécurisée des paiements, affiliations, abonnements et membres.</p></header>
+<section id="login" class="card">
+ <h2>Accès administrateur</h2>
+ <p class="muted">Saisis le code administrateur configuré dans les variables d'environnement Netlify. Ne le partage avec personne.</p>
+ <label>Code administrateur</label><input id="adminToken" type="password" autocomplete="current-password" placeholder="Code secret">
+ <button class="primary" id="loginBtn">Ouvrir l'administration</button><div id="loginMsg" class="msg" style="display:none"></div>
+</section>
+<section id="dashboard">
+ <div class="row"><h2>Tableau de bord</h2><button class="dark" id="refreshBtn">Actualiser</button><button id="logoutBtn">Fermer la session</button></div>
+ <div id="mainMsg" class="msg" style="display:none"></div>
+ <section class="card"><h2>Coordonnées de paiement à afficher aux membres</h2>
+  <div class="grid">
+   <div><label>Numéro Wave</label><input id="waveNumber" placeholder="Numéro Wave"></div>
+   <div><label>Numéro Orange Money</label><input id="orangeNumber" placeholder="Numéro Orange Money"></div>
+  </div>
+  <label>Nom du bénéficiaire</label><input id="accountName" placeholder="Nom du titulaire">
+  <label>Instructions affichées aux membres</label><textarea id="paymentInstructions" rows="3" placeholder="Instructions de paiement"></textarea>
+  <button class="primary" id="saveSettingsBtn">Enregistrer les coordonnées</button>
+ </section>
+ <section class="card"><h2>Demandes de paiement VIP en attente</h2><div id="paymentList" class="muted">Chargement...</div></section>
+ <section class="card"><h2>Demandes d'affiliation NILO3 en attente</h2><div id="affiliateList" class="muted">Chargement...</div></section>
+ <section class="card"><h2>Abonnements VIP</h2><div id="subscriptionList" class="muted">Chargement...</div></section>
+ <section class="card"><h2>Membres</h2>
+  <div class="grid"><div><label>Membre</label><select id="memberSelect"><option value="">Choisir un membre</option></select></div><div><label>Durée à offrir</label><select id="grantDays"><option value="7">7 jours</option><option value="30">30 jours</option><option value="90">90 jours</option></select></div></div>
+  <label>Note administrative (facultatif)</label><input id="grantNote" placeholder="Motif ou note interne">
+  <button class="primary" id="grantBtn">Accorder l'accès VIP</button>
+  <div id="memberList"></div>
+ </section>
+</section>
+</main>
+<script>
+let adminToken='';
+let dashboardData=null;
+const $=id=>document.getElementById(id);
+function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function message(id,text,error=false){const el=$(id);el.textContent=text;el.className='msg'+(error?' error':'');el.style.display='block';}
+async function api(method='GET',body=null){
+ const response=await fetch('/.netlify/functions/admin-api',{
+  method,headers:{'x-admin-token':adminToken,'Accept':'application/json',...(body?{'Content-Type':'application/json'}:{})},
+  body:body?JSON.stringify(body):undefined
+ });
+ const data=await response.json();
+ if(!response.ok||!data.success)throw new Error(data.error||'Erreur administrative.');
+ return data;
+}
+function memberMap(){return new Map((dashboardData?.profiles||[]).map(p=>[p.id,p]));}
+function renderRequests(){
+ const profiles=memberMap();
+ const payments=dashboardData.paymentRequests||[];
+ $('paymentList').innerHTML='';
+ const pendingPayments=payments.filter(x=>x.status==='pending');
+ if(!pendingPayments.length)$('paymentList').textContent='Aucune demande de paiement en attente.';
+ pendingPayments.forEach(item=>{
+  const p=profiles.get(item.user_id)||{};
+  const div=document.createElement('div');div.className='item';
+  div.innerHTML=`<div class="row"><strong>${esc(p.email||item.user_id)}</strong><span class="badge">${Number(item.amount_xof).toLocaleString('fr-FR')} FCFA</span></div>
+  <p>Formule : ${item.plan_code==='vip_7'?'VIP 7 jours':'VIP 30 jours'} · Paiement : ${item.payment_method==='wave'?'Wave':'Orange Money'}</p>
+  <p>Payeur : ${esc(item.payer_name)} · Référence : <strong>${esc(item.transaction_reference)}</strong></p>
+  <p>Envoyée le : ${esc(new Date(item.created_at).toLocaleString('fr-FR'))}</p>
+  <button class="primary" data-pay-approve="${esc(item.id)}">Valider et activer VIP</button><button class="danger" data-pay-reject="${esc(item.id)}">Refuser</button>`;
+  $('paymentList').appendChild(div);
+ });
+ const affiliates=(dashboardData.affiliateApplications||[]).filter(x=>x.status==='pending');
+ $('affiliateList').innerHTML='';
+ if(!affiliates.length)$('affiliateList').textContent='Aucune demande d’affiliation en attente.';
+ affiliates.forEach(item=>{
+  const p=profiles.get(item.user_id)||{};
+  const div=document.createElement('div');div.className='item';
+  div.innerHTML=`<div class="row"><strong>${esc(p.email||item.user_id)}</strong><span class="badge">Dépôt ${Number(item.deposit_amount).toLocaleString('fr-FR')} FCFA</span></div>
+  <p>Code : ${esc(item.partner_code)} · Identifiant partenaire : <strong>${esc(item.partner_username)}</strong></p>
+  <p>Référence à vérifier dans le tableau partenaire : <strong>${esc(item.proof_reference)}</strong></p>
+  <p class="muted">Vérifie personnellement l'inscription et le premier dépôt avant validation.</p>
+  <button class="primary" data-aff-approve="${esc(item.id)}">Valider · offrir 30 jours</button><button class="danger" data-aff-reject="${esc(item.id)}">Refuser</button>`;
+  $('affiliateList').appendChild(div);
+ });
+ document.querySelectorAll('[data-pay-approve]').forEach(b=>b.onclick=()=>review('review_payment',b.dataset.payApprove,'approve'));
+ document.querySelectorAll('[data-pay-reject]').forEach(b=>b.onclick=()=>review('review_payment',b.dataset.payReject,'reject'));
+ document.querySelectorAll('[data-aff-approve]').forEach(b=>b.onclick=()=>review('review_affiliate',b.dataset.affApprove,'approve'));
+ document.querySelectorAll('[data-aff-reject]').forEach(b=>b.onclick=()=>review('review_affiliate',b.dataset.affReject,'reject'));
+}
+function renderMembers(){
+ const profiles=dashboardData.profiles||[];
+ $('memberSelect').innerHTML='<option value="">Choisir un membre</option>';
+ $('memberList').innerHTML='';
+ profiles.forEach(p=>{
+  const label=`${p.email||'Sans e-mail'}${p.full_name?' · '+p.full_name:''}`;
+  $('memberSelect').add(new Option(label,p.id));
+  const row=document.createElement('div');row.className='item';
+  row.innerHTML=`<strong>${esc(label)}</strong><p class="muted">Inscription : ${esc(new Date(p.created_at).toLocaleDateString('fr-FR'))}</p>`;
+  $('memberList').appendChild(row);
+ });
+ if(!profiles.length)$('memberList').textContent='Aucun membre enregistré.';
+}
+function renderSubscriptions(){
+ const profiles=memberMap();
+ const rows=dashboardData.subscriptions||[];
+ $('subscriptionList').innerHTML='';
+ if(!rows.length){$('subscriptionList').textContent='Aucun abonnement enregistré.';return;}
+ rows.forEach(sub=>{
+  const p=profiles.get(sub.user_id)||{};
+  const div=document.createElement('div');div.className='item';
+  div.innerHTML=`<div class="row"><strong>${esc(p.email||sub.user_id)}</strong><span class="badge">${esc(sub.status)}</span></div>
+  <p>${esc(sub.plan_code)} · Source : ${esc(sub.source)} · ${Number(sub.amount_xof).toLocaleString('fr-FR')} FCFA</p>
+  <p>Du ${esc(new Date(sub.starts_at).toLocaleString('fr-FR'))} au ${esc(new Date(sub.expires_at).toLocaleString('fr-FR'))}</p>
+  ${sub.status==='active'?`<button class="danger" data-revoke="${esc(sub.id)}">Révoquer cet abonnement</button>`:''}`;
+  $('subscriptionList').appendChild(div);
+ });
+ document.querySelectorAll('[data-revoke]').forEach(b=>b.onclick=async()=>{
+  if(!confirm('Révoquer cet abonnement VIP ?'))return;
+  try{await api('POST',{action:'revoke_vip',id:b.dataset.revoke});await loadDashboard();message('mainMsg','Abonnement révoqué.');}
+  catch(e){message('mainMsg',e.message,true);}
+ });
+}
+function renderSettings(){
+ const d=dashboardData.paymentDetails||{};
+ $('waveNumber').value=d.wave_number||'';
+ $('orangeNumber').value=d.orange_money_number||'';
+ $('accountName').value=d.account_name||'';
+ $('paymentInstructions').value=d.instructions||'';
+}
+async function loadDashboard(){
+ try{
+  dashboardData=await api();
+  $('login').style.display='none';$('dashboard').style.display='block';
+  renderSettings();renderRequests();renderMembers();renderSubscriptions();
+ }catch(e){
+  $('dashboard').style.display='none';$('login').style.display='block';
+  message('loginMsg',e.message,true);
+ }
+}
+async function review(action,id,decision){
+ let note=prompt(decision==='approve'?'Note interne facultative.':'Motif du refus (facultatif).','')||'';
+ const label=action==='review_affiliate'?'la demande d’affiliation':'la demande de paiement';
+ if(!confirm(`${decision==='approve'?'Valider':'Refuser'} ${label} ?`))return;
+ try{
+  await api('POST',{action,id,decision,note});
+  message('mainMsg',decision==='approve'?'Demande validée. Les droits VIP ont été accordés.':'Demande refusée.');
+  await loadDashboard();
+ }catch(e){message('mainMsg',e.message,true);}
+}
+$('loginBtn').onclick=async()=>{
+ adminToken=$('adminToken').value.trim();
+ if(!adminToken)return message('loginMsg','Saisis le code administrateur.',true);
+ try{await api();sessionStorage.setItem('daniAdminToken',adminToken);await loadDashboard();}
+ catch(e){message('loginMsg',e.message,true);}
+};
+$('refreshBtn').onclick=loadDashboard;
+$('logoutBtn').onclick=()=>{
+ adminToken='';sessionStorage.removeItem('daniAdminToken');
+ $('dashboard').style.display='none';$('login').style.display='block';$('adminToken').value='';
+};
+$('saveSettingsBtn').onclick=async()=>{
+ try{
+  await api('POST',{action:'save_payment_details',wave_number:$('waveNumber').value,orange_number:$('orangeNumber').value,account_name:$('accountName').value,instructions:$('paymentInstructions').value});
+  message('mainMsg','Coordonnées de paiement enregistrées.');
+ }catch(e){message('mainMsg',e.message,true);}
+};
+$('grantBtn').onclick=async()=>{
+ const userId=$('memberSelect').value;
+ if(!userId)return message('mainMsg','Choisis un membre.',true);
+ try{
+  await api('POST',{action:'grant_vip',user_id:userId,days:Number($('grantDays').value),note:$('grantNote').value});
+  message('mainMsg','Accès VIP accordé.');
+  await loadDashboard();
+ }catch(e){message('mainMsg',e.message,true);}
+};
+try{
+ const saved=sessionStorage.getItem('daniAdminToken');
+ if(saved){adminToken=saved;$('adminToken').value=saved;loadDashboard();}
+}catch(_){}
+</script>
+</body>
+</html>
