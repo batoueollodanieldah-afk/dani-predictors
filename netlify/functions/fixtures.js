@@ -266,7 +266,6 @@ exports.handler = async function (event) {
 
       const status = normalizeStatus(statusLong);
 
-      // Ne pas afficher un faux 0-0 avant le coup d'envoi.
       const score = getMatchCategory(status) === "upcoming"
         ? { home: null, away: null }
         : parseScore(raw?.state?.score?.current);
@@ -377,14 +376,11 @@ exports.handler = async function (event) {
             `${SUPABASE_URL}/rest/v1/matches?on_conflict=id`,
             {
               method: "POST",
-
               headers: {
                 apikey: SUPABASE_KEY,
-                Authorization: `Bearer ${SUPABASE_KEY}`,
                 "Content-Type": "application/json",
                 Prefer: "resolution=merge-duplicates,return=minimal"
               },
-
               body: JSON.stringify(rows.slice(i, i + 100))
             }
           );
