@@ -18,6 +18,34 @@
 .matches-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:13px 0}.matches-toolbar input,.matches-toolbar select{flex:1;min-width:125px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);min-height:44px}.matches-status{font-size:11px;color:var(--muted);margin:10px 3px}.match-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}.match-tab{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 5px;color:#555;font-size:11px;font-weight:750}.match-tab b{display:block;font-size:17px;color:var(--ink)}.match-tab.active{border-color:var(--gold);background:#fff8e8;color:#8a621f}.country-title{margin:20px 3px 9px;font-size:15px;font-weight:850;color:#a77b2c}.league-title{font-size:12px;font-weight:800;margin:12px 3px 7px}.match-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:9px;box-shadow:var(--shadow)}.match-meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:10px;margin-bottom:11px}.match-teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:7px;text-align:center;font-weight:750}.match-team img{width:28px;height:28px;object-fit:contain;display:block;margin:0 auto 5px}.match-team span{font-size:11px;overflow-wrap:anywhere}.match-score{font-size:16px;font-weight:900;white-space:nowrap}.match-empty{text-align:center;padding:23px 15px;color:var(--muted);background:#fff;border:1px dashed var(--line);border-radius:16px;margin:12px 0;font-size:12px}.rubric-heading{background:#17181e;color:#fff;border-radius:18px;padding:17px;margin:0 0 14px}.rubric-heading h2{margin:0 0 5px;font-size:19px}.rubric-heading p{margin:0;color:#dedde2;font-size:11px}.rubric-warning{background:#fff8e8;border:1px solid #ead6a8;border-radius:14px;padding:12px;margin:10px 0 15px;color:#6f5726;font-size:11px}.rubric-count{font-size:11px;color:var(--muted);margin:10px 3px}.small-action{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:700}
 .predictions-box{background:#fff;border:1px solid #e5e0d4;border-radius:18px;padding:13px;margin:14px 0 18px;box-shadow:var(--shadow)}.predictions-box h3{font-size:14px;margin:0 0 4px}.prediction-card{border:1px solid var(--line);border-radius:14px;padding:12px;margin:9px 0;background:#fffdf8}.prediction-top{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:10px;color:var(--muted)}.prediction-teams{font-size:13px;font-weight:850;margin:7px 0}.prediction-pick{font-size:13px;font-weight:800;color:#85601f;margin:5px 0}.prediction-confidence{display:inline-block;background:#eaf5ef;color:#206c4e;border-radius:20px;padding:4px 8px;font-size:10px;font-weight:850}.prediction-analysis{font-size:10px;color:var(--muted);margin:7px 0 0;line-height:1.5}.prediction-result{font-size:10px;font-weight:850;padding:4px 8px;border-radius:20px;background:#f0eee9}.prediction-result.won{background:#e5f5ec;color:#18764b}.prediction-result.lost{background:#fae9e9;color:#a33333}.prediction-result.void{background:#efedf5;color:#66518d}
 @media(min-width:760px){.app{margin:18px auto;min-height:calc(100vh - 36px);border:1px solid #eee;border-radius:28px;box-shadow:0 15px 55px #0000000d}.bottom-wrap{bottom:25px}}
+
+/* Espace membre, VIP et affiliation */
+.form-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin:13px 0;box-shadow:var(--shadow)}
+.form-card h3{margin:0 0 8px;font-size:16px}
+.form-card p{font-size:12px;color:var(--muted);margin:5px 0 12px}
+.form-grid{display:grid;gap:10px}
+.form-control{width:100%;min-height:45px;border:1px solid #ddd9d0;border-radius:11px;padding:11px 12px;background:#fff;color:var(--ink);font:inherit;font-size:13px}
+.form-label{font-size:11px;font-weight:800;color:#56545a;display:block;margin:3px 0 5px}
+.primary-btn,.secondary-btn{border:0;border-radius:12px;padding:12px 15px;font-size:12px;font-weight:850;cursor:pointer}
+.primary-btn{background:#c79536;color:#17130b}
+.secondary-btn{background:#17181e;color:#f3d58e}
+.form-message{font-size:12px;padding:10px;border-radius:10px;background:#f5f2eb;color:#65552e;margin-top:10px;display:none}
+.form-message.error{background:#fff0f0;color:#a33333}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.plan-card{background:#17181e;color:#fff;border:1px solid #b58a38;border-radius:17px;padding:15px;text-align:left}
+.plan-card strong{display:block;color:#e7c36e;font-size:23px;margin:5px 0}
+.plan-card small{font-size:10px;color:#dedde2}
+.status-pill{display:inline-block;border-radius:20px;padding:5px 9px;background:#f0eee9;font-size:10px;font-weight:850}
+.status-pill.active{background:#e5f5ec;color:#18764b}
+.status-pill.pending{background:#fff4d8;color:#8a621f}
+.locked-card{position:relative;overflow:hidden;border:1px solid #d8bd80;background:linear-gradient(135deg,#fffdf7,#f1eadc)}
+.locked-card .locked-content{filter:blur(4px);opacity:.4;user-select:none}
+.locked-message{padding:12px;text-align:center;color:#72551d;font-size:12px;font-weight:800}
+.account-actions{display:flex;gap:8px;flex-wrap:wrap}
+.vip-info{background:#17181e;color:#fff;border-radius:16px;padding:15px;margin:12px 0}
+.vip-info strong{color:#e7c36e}
+.admin-link{display:inline-block;margin-top:12px;color:#8a621f;text-decoration:underline;font-size:11px}
+
 </style>
 </head>
 <body>
@@ -25,7 +53,7 @@
 <div class="toast" id="toast" role="status"></div>
 <header class="top">
   <a class="brand" href="#home" onclick="showView('home');return false" aria-label="DANI PREDICTORS"><span class="brand-mark">DP</span><span class="brand-name">DANI <span>PREDICTORS</span></span></a>
-  <div class="top-actions"><button class="icon-btn" aria-label="Offres" onclick="notify('Les offres seront disponibles prochainement.')">♙</button><button class="icon-btn" aria-label="Notifications" onclick="notify('Aucune nouvelle notification.')">♧</button><button class="icon-btn" aria-label="Paramètres" onclick="notify('Paramètres en préparation.')">⚙</button></div>
+  <div class="top-actions"><button class="icon-btn" aria-label="Mon compte" onclick="showView('account')">♙</button><button class="icon-btn" aria-label="Notifications" onclick="notify('Aucune nouvelle notification.')">♧</button><button class="icon-btn" aria-label="Administration" onclick="window.location.href='/admin.html'">⚙</button></div>
 </header>
 <main>
 <section class="view active" id="home">
@@ -39,7 +67,7 @@
     <a class="category" href="#services" onclick="showView('services');return false"><span class="cat-icon" style="color:#9564df">▦</span><span class="cat-label">Services<small>Outils et informations</small></span><span class="cat-art art-services">DP</span></a>
     <a class="category" href="#history" onclick="showView('history');return false"><span class="cat-icon">◷</span><span class="cat-label">Historique VIP<small>Suivi des publications</small></span><span class="cat-art art-history">📈</span></a>
   </div>
-  <div class="info-panel"><strong>Bienvenue sur DANI PREDICTORS.</strong><br>Une plateforme de matchs et d'analyses football. Les données proviennent d'API-Football. Les pronostics sont générés et publiés automatiquement uniquement lorsque les informations passent les contrôles de qualité.</div>
+  <div class="info-panel"><strong>Bienvenue sur DANI PREDICTORS.</strong><br>Une plateforme de matchs et d'analyses football alimentée par Highlightly et un modèle statistique interne DANI PREDICTORS. Les pronostics sont publiés automatiquement uniquement lorsque les données passent les contrôles de qualité.</div>
   <div class="footer-note">Les analyses sont des estimations. Aucun gain n'est garanti.</div></div>
 </section>
 
@@ -83,11 +111,83 @@
  <div class="subcategory"><span class="sub-icon">🔵</span><span><span class="sub-label">Plinko</span><span class="sub-note">Mécanismes aléatoires</span></span></div>
  </div><div class="info-panel">Les résultats passés ne permettent pas de connaître les prochains résultats d'un jeu aléatoire. Aucun gain n'est garanti.</div></div></section>
 
-<section class="view" id="vip"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Coupon VIP</h1></div><div class="subcategory-list"><div class="subcategory"><span class="sub-icon">♛</span><span><span class="sub-label">VIP 7 jours</span><span class="sub-note">Prix à définir · paiement non activé</span></span></div><div class="subcategory"><span class="sub-icon">👑</span><span><span class="sub-label">VIP 30 jours</span><span class="sub-note">Prix à définir · paiement non activé</span></span></div></div><div class="info-panel">Les comptes, abonnements et validations de paiement doivent être développés et testés avant toute commercialisation.</div></div></section>
+<section class="view" id="vip"><div class="content">
+  <div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Espace Premium / VIP</h1></div>
+  <div class="vip-info"><strong>Accès Premium DANI PREDICTORS</strong><br><span style="font-size:12px;color:#e7e4dc">Pronostics VIP, analyses détaillées et historique réservé aux membres actifs.</span><div id="vipStatus" style="margin-top:10px;font-size:12px">Connecte-toi pour consulter ton statut VIP.</div></div>
+  <div class="plan-grid">
+   <button class="plan-card" type="button" onclick="selectVipPlan('vip_7')"><span>VIP 7 JOURS</span><strong>3 000 FCFA</strong><small>Accès Premium pendant une semaine</small></button>
+   <button class="plan-card" type="button" onclick="selectVipPlan('vip_30')"><span>VIP 30 JOURS</span><strong>11 000 FCFA</strong><small>Accès Premium pendant un mois · offre la plus avantageuse</small></button>
+  </div>
+  <div class="form-card">
+   <h3>Demander un abonnement VIP</h3>
+   <p>Effectue le paiement par Wave ou Orange Money, puis soumets la référence. L'accès sera activé uniquement après vérification manuelle.</p>
+   <div id="paymentInstructions" class="info-panel" style="margin:8px 0">Les coordonnées de paiement seront affichées ici lorsqu'elles auront été configurées par l'administration.</div>
+   <form id="paymentRequestForm" class="form-grid">
+    <label><span class="form-label">Formule</span><select class="form-control" id="vipPlan" required><option value="vip_7">VIP 7 jours — 3 000 FCFA</option><option value="vip_30">VIP 30 jours — 11 000 FCFA</option></select></label>
+    <label><span class="form-label">Moyen de paiement</span><select class="form-control" id="paymentMethod" required><option value="wave">Wave</option><option value="orange_money">Orange Money</option></select></label>
+    <label><span class="form-label">Nom indiqué lors du paiement</span><input class="form-control" id="payerName" required maxlength="100" placeholder="Nom du payeur"></label>
+    <label><span class="form-label">Référence de transaction</span><input class="form-control" id="transactionReference" required maxlength="120" placeholder="Référence ou ID de transaction"></label>
+    <button class="primary-btn" type="submit">Envoyer ma demande de validation</button>
+    <div id="paymentMessage" class="form-message" role="status"></div>
+   </form>
+  </div>
+  <div class="form-card">
+   <h3>🎁 Obtenir 30 jours gratuits avec NILO3</h3>
+   <p>Inscris-toi chez le partenaire avec le code NILO3 et effectue un premier dépôt d'au moins 3 000 FCFA. L'administrateur vérifiera personnellement ton compte et ton dépôt avant d'accorder les 30 jours gratuits.</p>
+   <form id="affiliateRequestForm" class="form-grid">
+    <label><span class="form-label">Code partenaire</span><input class="form-control" id="affiliateCode" value="NILO3" readonly></label>
+    <label><span class="form-label">Identifiant / pseudo chez le partenaire</span><input class="form-control" id="partnerUsername" required maxlength="100" placeholder="Ton identifiant partenaire"></label>
+    <label><span class="form-label">Montant du premier dépôt (FCFA)</span><input class="form-control" id="affiliateDeposit" type="number" min="3000" step="1" required placeholder="Minimum 3000"></label>
+    <label><span class="form-label">Référence du dépôt</span><input class="form-control" id="affiliateProofReference" required maxlength="120" placeholder="Référence à vérifier"></label>
+    <button class="secondary-btn" type="submit">Soumettre ma demande d'affiliation</button>
+    <div id="affiliateMessage" class="form-message" role="status"></div>
+   </form>
+  </div>
+  <div class="form-card"><h3>Mes demandes récentes</h3><div id="memberRequests"><p>Connecte-toi pour consulter tes demandes et ton abonnement.</p></div></div>
+  <div class="footer-note">Aucun gain n'est garanti. Les pronostics sont des estimations et les paris comportent un risque de perte.</div>
+ </div></section>
 <section class="view" id="esport"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">E-sport FIFA</h1></div><div class="info-panel">Cette rubrique est prévue pour les analyses et contenus e-sport. Aucun événement ni résultat n'est actuellement connecté.</div></div></section>
-<section class="view" id="services"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Services</h1></div><div class="subcategory-list"><button class="subcategory" onclick="showView('promo')"><span class="sub-icon">🎟️</span><span><span class="sub-label">Code promo NILO3</span><span class="sub-note">Voir le code partenaire</span></span></button><div class="subcategory"><span class="sub-icon">📊</span><span><span class="sub-label">Statistiques</span><span class="sub-note">Données détaillées à connecter</span></span></div><div class="subcategory"><span class="sub-icon">☎</span><span><span class="sub-label">Contact</span><span class="sub-note">Coordonnées à configurer</span></span></div></div></div></section>
+<section class="view" id="services"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Services</h1></div><div class="subcategory-list"><button class="subcategory" onclick="showView('promo')"><span class="sub-icon">🎟️</span><span><span class="sub-label">Code promo NILO3</span><span class="sub-note">Voir le code partenaire</span></span></button><div class="subcategory"><span class="sub-icon">📊</span><span><span class="sub-label">Statistiques</span><span class="sub-note">Données détaillées à connecter</span></span></div><div class="subcategory"><span class="sub-icon">☎</span><span><span class="sub-label">Contact</span><span class="sub-note">Coordonnées à configurer</span></span></div><a class="subcategory" href="/admin.html"><span class="sub-icon">⚙</span><span><span class="sub-label">Administration</span><span class="sub-note">Accès réservé au propriétaire</span></span></a></div></div></section>
 <section class="view" id="history"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Historique VIP</h1></div><div class="info-panel">Historique des pronostics publiés automatiquement et suivi des résultats officiels lorsqu'ils sont disponibles.</div><div class="matches-status" id="historyStatus">Chargement de l'historique...</div><div id="historyPredictions"><div class="match-empty">Chargement...</div></div></div></section>
 <section class="view" id="promo"><div class="content"><div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Code partenaire</h1></div><div class="subcategory" style="display:block;padding:22px"><div class="sub-label">Code promo NILO3</div><div style="font-size:34px;font-weight:950;letter-spacing:5px;color:#c79536;margin:15px 0">NILO3</div><button class="small-action" onclick="copyPartnerCode()">Copier le code</button><p class="sub-note" style="margin-top:15px">Lien partenaire : <a href="https://1win.ci/casino?p=hg6e" target="_blank" rel="noopener noreferrer" style="color:#9b742f;text-decoration:underline">visiter l'opérateur ↗</a></p><p class="sub-note">Lien partenaire susceptible de générer une commission. Les offres dépendent des conditions officielles, du pays et de l'éligibilité.</p></div></div></section>
+
+<section class="view" id="account"><div class="content">
+ <div class="back-row"><button class="back" onclick="showView('home')">‹</button><h1 class="page-title">Mon compte</h1></div>
+ <div id="signedInPanel" class="form-card" style="display:none">
+  <h3>Bienvenue sur DANI PREDICTORS</h3><p id="signedInEmail"></p>
+  <div class="account-actions"><button class="primary-btn" onclick="showView('vip')">Voir mon abonnement VIP</button><button class="secondary-btn" onclick="signOutMember()">Se déconnecter</button></div>
+ </div>
+ <div id="authPanel">
+  <div class="form-card">
+   <h3>Créer un compte membre</h3><p>Utilise une adresse e-mail valide. Un message de confirmation peut être envoyé par Supabase.</p>
+   <form id="signupForm" class="form-grid">
+    <label><span class="form-label">Nom / pseudo</span><input class="form-control" id="signupName" required maxlength="80" placeholder="Ton nom"></label>
+    <label><span class="form-label">Adresse e-mail</span><input class="form-control" id="signupEmail" type="email" required autocomplete="email" placeholder="nom@exemple.com"></label>
+    <label><span class="form-label">Mot de passe (8 caractères minimum)</span><input class="form-control" id="signupPassword" type="password" minlength="8" required autocomplete="new-password" placeholder="Créer un mot de passe"></label>
+    <button class="primary-btn" type="submit">Créer mon compte</button><div id="signupMessage" class="form-message" role="status"></div>
+   </form>
+  </div>
+  <div class="form-card">
+   <h3>J'ai déjà un compte</h3>
+   <form id="loginForm" class="form-grid">
+    <label><span class="form-label">Adresse e-mail</span><input class="form-control" id="loginEmail" type="email" required autocomplete="email"></label>
+    <label><span class="form-label">Mot de passe</span><input class="form-control" id="loginPassword" type="password" required autocomplete="current-password"></label>
+    <button class="secondary-btn" type="submit">Se connecter</button><button type="button" class="small-action" onclick="resetMemberPassword()">Mot de passe oublié ?</button>
+    <div id="loginMessage" class="form-message" role="status"></div>
+   </form>
+  </div>
+ </div>
+ <div id="passwordRecoveryPanel" class="form-card" style="display:none">
+  <h3>Choisir un nouveau mot de passe</h3>
+  <form id="updatePasswordForm" class="form-grid">
+   <label><span class="form-label">Nouveau mot de passe (8 caractères minimum)</span><input class="form-control" id="newMemberPassword" type="password" minlength="8" required autocomplete="new-password"></label>
+   <button class="primary-btn" type="submit">Enregistrer le nouveau mot de passe</button>
+   <div id="passwordUpdateMessage" class="form-message" role="status"></div>
+  </form>
+ </div>
+ <div class="info-panel">Tes identifiants restent gérés par Supabase Auth. Ne partage jamais ton mot de passe ou tes codes de connexion.</div>
+</div></section>
+
 </main>
 
 <div class="promo-overlay" id="promoWelcome" role="dialog" aria-modal="true" aria-labelledby="promoWelcomeTitle"><div class="promo-modal"><button class="promo-close" type="button" aria-label="Fermer" onclick="closePromoWelcome()">×</button><div class="promo-kicker">Offre partenaire · DANI PREDICTORS</div><h2 id="promoWelcomeTitle">Découvre notre partenaire</h2><p>Si tu souhaites créer un compte chez notre partenaire, tu peux utiliser notre lien et saisir le code promo <strong>NILO3</strong> lors de ton inscription, si cette option est proposée.</p><div class="promo-code-box"><small>TON CODE PROMO</small><span class="promo-code">NILO3</span><button class="promo-copy" onclick="copyPartnerCode()">Copier le code</button></div><a class="promo-cta" href="https://1win.ci/casino?p=hg6e" target="_blank" rel="noopener noreferrer" onclick="closePromoWelcome()">Visiter le site partenaire ↗</a><p class="promo-disclosure">Lien affilié : DANI PREDICTORS peut recevoir une commission. Toute offre dépend des conditions officielles, du pays et de ton éligibilité. Réservé aux adultes autorisés par la réglementation locale. Joue de manière responsable ; aucun gain n'est garanti.</p><button class="promo-later" onclick="closePromoWelcome()">Continuer sans visiter</button></div></div>
@@ -95,6 +195,7 @@
 <div class="bottom-wrap"><nav class="bottom-nav" aria-label="Navigation rapide"><button class="bottom-item active" onclick="showView('home',this)">🔥<span>Accueil</span></button><button class="bottom-item" onclick="showView('games',this)">🎲<span>Casino</span></button><button class="bottom-item" onclick="showView('football',this)">⚽<span>Sport</span></button><button class="bottom-item" onclick="showView('vip',this)">♛<span>VIP</span></button><button class="bottom-item" onclick="showView('history',this)">◷<span>Historique</span></button></nav><button class="bot-fab" aria-label="Assistant" onclick="notify('Assistant DANI PREDICTORS : bientôt disponible.')">▣</button></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* DANI PREDICTORS — interface football et publications automatiques */
 let allMatches = [];
@@ -119,7 +220,7 @@ function showView(id, button) {
   document.querySelectorAll('.bottom-item').forEach(item => item.classList.remove('active'));
   if (button) button.classList.add('active');
   else {
-    const map = {home:0,games:1,football:2,rubric:2,vip:3,history:4};
+    const map = {home:0,games:1,football:2,rubric:2,vip:3,history:4,account:0};
     const items = document.querySelectorAll('.bottom-item');
     if (map[id] !== undefined && items[map[id]]) items[map[id]].classList.add('active');
   }
@@ -129,6 +230,8 @@ function showView(id, button) {
     if (lastPredictionsDate !== matchDate.value && !loadingPredictions) loadPublishedPredictions();
   }
   if (id === 'history') loadPredictionHistory();
+  if (id === 'vip') loadVipDashboard();
+  if (id === 'account') refreshAccountPanel();
 }
 function notify(message) {
   const toast = document.getElementById('toast');
@@ -276,6 +379,22 @@ function renderPredictionCards(container, rows, withResults = false) {
   rows.forEach(row => {
     const match = row.match || {};
     const card = document.createElement('article'); card.className = 'prediction-card';
+    if (row.locked) {
+      card.classList.add('locked-card');
+      const teamsLocked = document.createElement('div');
+      teamsLocked.className = 'prediction-teams';
+      teamsLocked.textContent = `${match.home_team || 'Équipe domicile'} — ${match.away_team || 'Équipe extérieur'}`;
+      const lockedText = document.createElement('div');
+      lockedText.className = 'locked-message';
+      lockedText.textContent = '🔒 Pronostic réservé aux membres VIP. Abonne-toi pour voir la sélection et son analyse.';
+      const unlock = document.createElement('button');
+      unlock.className = 'primary-btn';
+      unlock.textContent = 'Découvrir les offres VIP';
+      unlock.onclick = () => showView('vip');
+      card.append(teamsLocked, lockedText, unlock);
+      container.appendChild(card);
+      return;
+    }
     const top = document.createElement('div'); top.className = 'prediction-top';
     const date = match.match_date ? new Date(match.match_date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',timeZone:'Africa/Abidjan'}) : '';
     const league = [match.league,match.country].filter(Boolean).join(' · ');
@@ -294,11 +413,16 @@ function renderPredictionCards(container, rows, withResults = false) {
     teams.textContent = `${match.home_team || 'Équipe domicile'} — ${match.away_team || 'Équipe extérieur'}`;
     const pick = document.createElement('div'); pick.className = 'prediction-pick'; pick.textContent = row.prediction || 'Sélection non disponible';
     const confidence = document.createElement('span'); confidence.className = 'prediction-confidence';
-    confidence.textContent = row.confidence !== null && row.confidence !== undefined ? `Probabilité API : ${Number(row.confidence).toFixed(1)} %` : 'Probabilité non disponible';
+    confidence.textContent = row.confidence !== null && row.confidence !== undefined ? `Probabilité estimée : ${Number(row.confidence).toFixed(1)} %` : 'Probabilité non disponible';
     const analysis = document.createElement('p'); analysis.className = 'prediction-analysis'; analysis.textContent = row.analysis || '';
     card.append(top,teams,pick,confidence,analysis);
     if (withResults && match.home_score !== null && match.home_score !== undefined && match.away_score !== null && match.away_score !== undefined) {
       const score = document.createElement('div'); score.className = 'prediction-analysis'; score.textContent = `Score final enregistré : ${match.home_score} - ${match.away_score}`;
+      card.appendChild(score);
+    }
+    container.appendChild(card);
+  });
+}
       card.appendChild(score);
     }
     container.appendChild(card);
@@ -319,7 +443,7 @@ function renderPublishedPredictions() {
   else if (currentRubricKey === 'coupon') unavailableMessage = 'Le coupon total reste indisponible tant que les cotes réelles des bookmakers ne sont pas connectées.';
   else if (currentRubricKey === 'odds') unavailableMessage = 'Aucune cote 50+ ne sera publiée sans une source de cotes bookmakers vérifiée.';
   else if (currentRubricKey === 'goals') unavailableMessage = 'Les marchés Plus/Moins ne sont pas publiés tant qu’une probabilité exploitable et vérifiée n’est pas disponible.';
-  else if (currentRubricKey === 'exact') unavailableMessage = 'L’API connectée ne fournit pas de score exact suffisamment justifié. Aucun score ne sera inventé.';
+  else if (currentRubricKey === 'exact') unavailableMessage = 'Les données connectées ne justifient pas un score exact suffisamment justifié. Aucun score ne sera inventé.';
   if (unavailableMessage) {
     container.innerHTML = `<div class="match-empty">${escapeText(unavailableMessage)}</div>`;
   } else {
@@ -335,7 +459,7 @@ async function loadPublishedPredictions(forceRefresh = false) {
   const status = document.getElementById('predictionsStatus');
   if (status) status.textContent = 'Chargement des pronostics publiés...';
   try {
-    const response = await fetch(`/.netlify/functions/published-predictions?date=${encodeURIComponent(selectedDate)}`,{headers:{Accept:'application/json'}});
+    const response = await fetch(`/.netlify/functions/published-predictions?date=${encodeURIComponent(selectedDate)}`,{headers:await memberAuthHeaders()});
     const data = await response.json();
     if (!response.ok || data.success !== true) throw new Error(data.error || 'Chargement des pronostics impossible.');
     publishedPredictions = Array.isArray(data.predictions) ? data.predictions.map(normalizePredictionRow) : [];
@@ -354,7 +478,7 @@ async function loadPredictionHistory() {
   if (!container) return;
   if (status) status.textContent = 'Chargement de l’historique...';
   try {
-    const response = await fetch('/.netlify/functions/published-predictions?history=1',{headers:{Accept:'application/json'}});
+    const response = await fetch('/.netlify/functions/published-predictions?history=1',{headers:await memberAuthHeaders()});
     const data = await response.json();
     if (!response.ok || data.success !== true) throw new Error(data.error || 'Historique indisponible.');
     const rows = Array.isArray(data.predictions) ? data.predictions.map(normalizePredictionRow) : [];
@@ -369,13 +493,13 @@ async function loadPredictionHistory() {
 }
 
 const rubricDefinitions = {
-  safe:{title:'Pronos sûrs',description:'Sélections individuelles dont la probabilité annoncée par API-Football atteint le seuil de contrôle.',warning:'Aucun pari n’est sûr. Le système n’affiche ici que les sélections dont la probabilité API atteint au moins 75 % avec un écart minimum de 15 points sur la deuxième issue.'},
+  safe:{title:'Pronos sûrs',description:'Sélections individuelles dont la probabilité estimée par le modèle statistique interne atteint le seuil de contrôle.',warning:'Aucun pari n’est sûr. Le système n’affiche ici que les sélections dont la probabilité estimée atteint au moins 75 % avec un écart minimum de 10 points sur la deuxième issue.'},
   coupon:{title:'Meilleur coupon total',description:'Rubrique en attente de cotes bookmakers vérifiées.',warning:'Aucun coupon total ne sera créé sans cotes réelles et vérifiables. Les probabilités API ne sont pas des cotes.'},
   combined:{title:'Matchs combinés',description:'Rubrique en attente de cotes réelles pour calculer une combinaison.',warning:'Les sélections individuelles ne sont pas assemblées en combiné sans cotes bookmakers vérifiées.'},
-  top5:{title:'Top 5 du jour',description:'Jusqu’à cinq sélections publiées, classées par probabilité API annoncée.',warning:'Ce classement n’est pas une garantie de résultat. Il reprend uniquement les sélections qui ont passé les contrôles automatiques.'},
+  top5:{title:'Top 5 du jour',description:'Jusqu’à cinq sélections publiées, classées par probabilité estimée.',warning:'Ce classement n’est pas une garantie de résultat. Il reprend uniquement les sélections qui ont passé les contrôles automatiques.'},
   odds:{title:'Cote 50+ du dimanche',description:'Rubrique réservée aux cotes réelles et vérifiables.',warning:'Aucune cote bookmaker n’est actuellement connectée. Aucune cote 50+ ne sera inventée.'},
   goals:{title:'Plus / moins de buts',description:'Marchés de buts en attente de données de probabilité suffisamment exploitables.',warning:'Aucun marché Plus/Moins ne sera publié sans données réelles permettant une validation automatique.'},
-  single:{title:'Match simple',description:'Pronostics individuels générés automatiquement à partir des données API-Football.',warning:'Chaque sélection affichée est une estimation du fournisseur API-Football, pas une certitude ni une garantie de gain.'},
+  single:{title:'Match simple',description:'Pronostics individuels générés automatiquement à partir des données Highlightly et du modèle statistique interne DANI.',warning:'Chaque sélection affichée est une estimation du modèle statistique interne DANI, pas une certitude ni une garantie de gain.'},
   exact:{title:'Score exact',description:'Rubrique d’estimation des scores.',warning:'Aucun score exact ne sera inventé. Le service de prédictions connecté ne justifie pas actuellement une publication de score exact.'}
 };
 function renderCurrentRubric() {
@@ -427,6 +551,284 @@ countryFilter.addEventListener('change',() => { updateLeagueFilter(); displayMat
 leagueFilter.addEventListener('change',displayMatches);
 matchDate.addEventListener('change',() => { lastLoadedDate = ''; lastPredictionsDate = ''; loadFootballMatches(true); loadPublishedPredictions(true); });
 matchDate.value = getAbidjanDate();
+
+// =========================================================
+// AUTHENTIFICATION, ABONNEMENTS VIP ET AFFILIATION
+// =========================================================
+let supabaseClient = null;
+let currentMemberSession = null;
+let memberDashboard = null;
+
+function showFormMessage(id, message, isError = false) {
+  const box = document.getElementById(id);
+  if (!box) return;
+  box.textContent = message;
+  box.style.display = 'block';
+  box.classList.toggle('error', Boolean(isError));
+}
+
+async function initMemberAuth() {
+  try {
+    const response = await fetch('/.netlify/functions/public-config', {headers:{Accept:'application/json'}});
+    const config = await response.json();
+    if (!response.ok || !config.success || !window.supabase?.createClient) {
+      throw new Error(config.error || 'Configuration de connexion indisponible.');
+    }
+    supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey);
+    const {data} = await supabaseClient.auth.getSession();
+    currentMemberSession = data?.session || null;
+    supabaseClient.auth.onAuthStateChange((authEvent, session) => {
+      if (authEvent === 'PASSWORD_RECOVERY') {
+        const recovery = document.getElementById('passwordRecoveryPanel');
+        if (recovery) recovery.style.display = 'block';
+        showView('account');
+      }
+      currentMemberSession = session || null;
+      refreshAccountPanel();
+      if (session) {
+        loadVipDashboard();
+        lastPredictionsDate = '';
+        historyLoaded = false;
+        if (currentRubricKey) loadPublishedPredictions(true);
+      } else {
+        memberDashboard = null;
+        lastPredictionsDate = '';
+        if (currentRubricKey) loadPublishedPredictions(true);
+      }
+      if (document.getElementById('history')?.classList.contains('active')) {
+        loadPredictionHistory();
+      }
+    });
+    refreshAccountPanel();
+  } catch (error) {
+    console.error('Initialisation compte membre :', error);
+    showFormMessage('loginMessage', 'Le service de compte n’est pas encore configuré. Vérifie la clé publique Supabase dans Netlify.', true);
+  }
+}
+
+async function memberAuthHeaders() {
+  const headers = {Accept:'application/json'};
+  if (supabaseClient) {
+    const {data} = await supabaseClient.auth.getSession();
+    const token = data?.session?.access_token;
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+async function memberApi(method = 'GET', body = null) {
+  const headers = await memberAuthHeaders();
+  if (body) headers['Content-Type'] = 'application/json';
+  const response = await fetch('/.netlify/functions/member-api', {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const data = await response.json();
+  if (!response.ok || !data.success) throw new Error(data.error || 'La demande ne peut pas être traitée.');
+  return data;
+}
+
+function refreshAccountPanel() {
+  const logged = Boolean(currentMemberSession?.user);
+  const authPanel = document.getElementById('authPanel');
+  const signedInPanel = document.getElementById('signedInPanel');
+    if (authPanel) authPanel.style.display = logged ? 'none' : 'block';
+  if (signedInPanel) signedInPanel.style.display = logged ? 'block' : 'none';
+  const email = document.getElementById('signedInEmail');
+  if (email && logged) email.textContent = currentMemberSession.user.email || 'Compte connecté';
+  const vipStatus = document.getElementById('vipStatus');
+  if (vipStatus && !logged) vipStatus.textContent = 'Connecte-toi pour acheter un abonnement ou consulter ton statut VIP.';
+}
+
+async function signOutMember() {
+  if (!supabaseClient) return;
+  const {error} = await supabaseClient.auth.signOut();
+  if (error) notify('Déconnexion impossible pour le moment.');
+  else {
+    currentMemberSession = null;
+    memberDashboard = null;
+    refreshAccountPanel();
+    notify('Tu es déconnecté.');
+    showView('home');
+  }
+}
+
+async function resetMemberPassword() {
+  if (!supabaseClient) return notify('Le service de compte n’est pas configuré.');
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) return showFormMessage('loginMessage','Saisis ton adresse e-mail avant de demander la réinitialisation.',true);
+  const {error} = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/index.html'
+  });
+  showFormMessage('loginMessage', error ? error.message : 'Si cette adresse existe, un e-mail de réinitialisation a été envoyé.', Boolean(error));
+}
+
+document.getElementById('signupForm')?.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!supabaseClient) return showFormMessage('signupMessage','Le service de compte n’est pas encore configuré.',true);
+  const fullName = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  if (password.length < 8) return showFormMessage('signupMessage','Le mot de passe doit contenir au moins 8 caractères.',true);
+  const {data,error} = await supabaseClient.auth.signUp({
+    email,password,options:{data:{full_name:fullName}}
+  });
+  if (error) return showFormMessage('signupMessage',error.message,true);
+  if (data.session) {
+    currentMemberSession = data.session;
+    showFormMessage('signupMessage','Compte créé et connecté. Bienvenue !');
+    refreshAccountPanel();
+    loadVipDashboard();
+  } else {
+    showFormMessage('signupMessage','Compte créé. Consulte ta boîte e-mail pour confirmer ton adresse avant de te connecter.');
+  }
+});
+
+document.getElementById('loginForm')?.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!supabaseClient) return showFormMessage('loginMessage','Le service de compte n’est pas encore configuré.',true);
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const {data,error} = await supabaseClient.auth.signInWithPassword({email,password});
+  if (error) return showFormMessage('loginMessage',error.message,true);
+  currentMemberSession = data.session;
+  showFormMessage('loginMessage','Connexion réussie.');
+  refreshAccountPanel();
+  loadVipDashboard();
+  showView('vip');
+});
+
+function selectVipPlan(code) {
+  const select = document.getElementById('vipPlan');
+  if (select) select.value = code;
+  document.getElementById('paymentRequestForm')?.scrollIntoView({behavior:'smooth',block:'center'});
+  if (!currentMemberSession) notify('Connecte-toi avant de demander ton abonnement VIP.');
+}
+
+function formatDateFr(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short',timeZone:'Africa/Abidjan'});
+}
+
+function renderMemberRequests(data) {
+  const container = document.getElementById('memberRequests');
+  if (!container) return;
+  const payments = data.paymentRequests || [];
+  const affiliates = data.affiliateApplications || [];
+  const items = [
+    ...payments.map(x => ({date:x.created_at,type:`Paiement ${x.plan_code === 'vip_7' ? 'VIP 7 jours' : 'VIP 30 jours'} · ${Number(x.amount_xof).toLocaleString('fr-FR')} FCFA`,status:x.status,note:x.admin_note})),
+    ...affiliates.map(x => ({date:x.created_at,type:'Demande affiliation NILO3',status:x.status,note:x.admin_note}))
+  ].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if (!items.length) { container.textContent = 'Aucune demande envoyée pour le moment.'; return; }
+  container.innerHTML = '';
+  items.slice(0,8).forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'match-card';
+    const status = document.createElement('span');
+    status.className = `status-pill ${item.status === 'approved' ? 'active' : item.status === 'pending' ? 'pending' : ''}`;
+    status.textContent = item.status === 'approved' ? 'VALIDÉE' : item.status === 'pending' ? 'EN ATTENTE' : 'REFUSÉE';
+    const title = document.createElement('strong'); title.textContent = item.type;
+    const date = document.createElement('p'); date.className = 'sub-note'; date.textContent = formatDateFr(item.date);
+    row.append(title,status,date);
+    if (item.note) { const note=document.createElement('p'); note.className='sub-note'; note.textContent=`Note : ${item.note}`; row.appendChild(note); }
+    container.appendChild(row);
+  });
+}
+
+async function loadVipDashboard() {
+  const statusBox = document.getElementById('vipStatus');
+  if (!currentMemberSession) {
+    if (statusBox) statusBox.textContent = 'Connecte-toi pour consulter ton statut VIP.';
+    return;
+  }
+  if (statusBox) statusBox.textContent = 'Vérification de ton abonnement...';
+  try {
+    const data = await memberApi('GET');
+    memberDashboard = data;
+    if (statusBox) {
+      if (data.subscription) {
+        statusBox.innerHTML = `<span class="status-pill active">VIP ACTIF</span> · Expire le ${escapeText(formatDateFr(data.subscription.expires_at))}`;
+      } else {
+        statusBox.innerHTML = '<span class="status-pill">AUCUN ABONNEMENT ACTIF</span> · Choisis une formule ci-dessous.';
+      }
+    }
+    const details = data.paymentDetails || {};
+    const instructions = document.getElementById('paymentInstructions');
+    if (instructions) {
+      const wave = details.wave_number ? `Wave : ${details.wave_number}` : 'Wave : numéro à confirmer';
+      const orange = details.orange_money_number ? `Orange Money : ${details.orange_money_number}` : 'Orange Money : numéro à confirmer';
+      const account = details.account_name ? ` · Nom : ${details.account_name}` : '';
+      instructions.textContent = `${wave} · ${orange}${account}. ${details.instructions || 'Après paiement, saisis la référence de transaction. Activation après vérification manuelle.'}`;
+    }
+    renderMemberRequests(data);
+  } catch (error) {
+    if (statusBox) statusBox.textContent = error.message;
+    const requests = document.getElementById('memberRequests');
+    if (requests) requests.textContent = 'Impossible de charger tes demandes.';
+  }
+}
+
+document.getElementById('paymentRequestForm')?.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!currentMemberSession) {
+    showFormMessage('paymentMessage','Connecte-toi avant de soumettre un paiement.',true);
+    showView('account');
+    return;
+  }
+  const body = {
+    action:'payment_request',
+    plan_code:document.getElementById('vipPlan').value,
+    payment_method:document.getElementById('paymentMethod').value,
+    payer_name:document.getElementById('payerName').value.trim(),
+    transaction_reference:document.getElementById('transactionReference').value.trim()
+  };
+  try {
+    const data = await memberApi('POST',body);
+    showFormMessage('paymentMessage',data.message);
+    event.target.reset();
+    await loadVipDashboard();
+  } catch (error) { showFormMessage('paymentMessage',error.message,true); }
+});
+
+document.getElementById('affiliateRequestForm')?.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!currentMemberSession) {
+    showFormMessage('affiliateMessage','Connecte-toi avant de soumettre ta demande.',true);
+    showView('account');
+    return;
+  }
+  const body = {
+    action:'affiliate_request',
+    partner_code:'NILO3',
+    partner_username:document.getElementById('partnerUsername').value.trim(),
+    deposit_amount:Number(document.getElementById('affiliateDeposit').value),
+    proof_reference:document.getElementById('affiliateProofReference').value.trim()
+  };
+  try {
+    const data = await memberApi('POST',body);
+    showFormMessage('affiliateMessage',data.message);
+    event.target.reset();
+    document.getElementById('affiliateCode').value = 'NILO3';
+    await loadVipDashboard();
+  } catch (error) { showFormMessage('affiliateMessage',error.message,true); }
+});
+
+
+document.getElementById('updatePasswordForm')?.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!supabaseClient) return showFormMessage('passwordUpdateMessage','Service de compte indisponible.',true);
+  const password = document.getElementById('newMemberPassword').value;
+  if (password.length < 8) return showFormMessage('passwordUpdateMessage','Le mot de passe doit contenir au moins 8 caractères.',true);
+  const {error} = await supabaseClient.auth.updateUser({password});
+  if (error) return showFormMessage('passwordUpdateMessage',error.message,true);
+  showFormMessage('passwordUpdateMessage','Mot de passe modifié avec succès.');
+  document.getElementById('passwordRecoveryPanel').style.display = 'none';
+});
+
+initMemberAuth();
+
 </script>
 </body>
 </html>
