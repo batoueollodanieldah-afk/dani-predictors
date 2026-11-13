@@ -423,11 +423,7 @@ function renderPredictionCards(container, rows, withResults = false) {
     container.appendChild(card);
   });
 }
-      card.appendChild(score);
-    }
-    container.appendChild(card);
-  });
-}
+      
 function renderPublishedPredictions() {
   const container = document.getElementById('publishedPredictions');
   const status = document.getElementById('predictionsStatus');
