@@ -180,7 +180,7 @@ $('logoutBtn').onclick=()=>{
 };
 $('saveSettingsBtn').onclick=async()=>{
  try{
-  await api('POST',{action:'save_payment_details',wave_number:$('waveNumber').value,orange_number:$('orangeNumber').value,account_name:$('accountName').value,instructions:$('paymentInstructions').value});
+  await api('POST',{action:'save_payment_details',wave_number:$('waveNumber').value,orange_money_number:$('orangeNumber').value,account_name:$('accountName').value,instructions:$('paymentInstructions').value});
   message('mainMsg','Coordonnées de paiement enregistrées.');
  }catch(e){message('mainMsg',e.message,true);}
 };
