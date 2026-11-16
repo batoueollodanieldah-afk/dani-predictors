@@ -104,19 +104,39 @@ exports.handler = async function (event) {
     });
   }
 
-  const auth = await authenticate(event, url, publishable);
-
-  if (auth.error) {
-    return json(auth.status, {
-      success: false,
-      error: auth.error
-    });
-  }
-
-  const user = auth.user;
-
   try {
+    // LECTURE PUBLIQUE DES COORDONNÉES DE PAIEMENT
     if (event.httpMethod === "GET") {
+      const authorization =
+        event.headers?.authorization ||
+        event.headers?.Authorization ||
+        "";
+
+      // Visiteur non connecté : retourner uniquement les coordonnées publiques.
+      if (!authorization.trim()) {
+        const settingsRows = await db(
+          url,
+          secret,
+          "app_settings?select=value&key=eq.payment_details&limit=1"
+        );
+
+        return json(200, {
+          success: true,
+          paymentDetails: settingsRows?.[0]?.value || {}
+        });
+      }
+
+      // Visiteur connecté : vérifier son identité.
+      const auth = await authenticate(event, url, publishable);
+
+      if (auth.error) {
+        return json(auth.status, {
+          success: false,
+          error: auth.error
+        });
+      }
+
+      const user = auth.user;
       const now = new Date().toISOString();
 
       const subscriptions = await db(
@@ -155,6 +175,18 @@ exports.handler = async function (event) {
         paymentDetails: settingsRows?.[0]?.value || {}
       });
     }
+
+    // TOUTES LES ACTIONS POST RESTENT RÉSERVÉES AUX MEMBRES CONNECTÉS.
+    const auth = await authenticate(event, url, publishable);
+
+    if (auth.error) {
+      return json(auth.status, {
+        success: false,
+        error: auth.error
+      });
+    }
+
+    const user = auth.user;
 
     let body = {};
 
