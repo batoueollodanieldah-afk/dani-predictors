@@ -565,40 +565,70 @@ function showFormMessage(id, message, isError = false) {
 
 async function initMemberAuth() {
   try {
-    const response = await fetch('/.netlify/functions/public-config', {headers:{Accept:'application/json'}});
+    const response = await fetch('/.netlify/functions/public-config', {
+      headers: {Accept:'application/json'}
+    });
+
     const config = await response.json();
+
     if (!response.ok || !config.success || !window.supabase?.createClient) {
       throw new Error(config.error || 'Configuration de connexion indisponible.');
     }
-    supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey);
+
+    supabaseClient = window.supabase.createClient(
+      config.supabaseUrl,
+      config.supabasePublishableKey
+    );
+
     const {data} = await supabaseClient.auth.getSession();
     currentMemberSession = data?.session || null;
+
     supabaseClient.auth.onAuthStateChange((authEvent, session) => {
       if (authEvent === 'PASSWORD_RECOVERY') {
         const recovery = document.getElementById('passwordRecoveryPanel');
         if (recovery) recovery.style.display = 'block';
         showView('account');
       }
+
       currentMemberSession = session || null;
       refreshAccountPanel();
+
       if (session) {
         loadVipDashboard();
         lastPredictionsDate = '';
         historyLoaded = false;
-        if (currentRubricKey) loadPublishedPredictions(true);
+
+        if (currentRubricKey) {
+          loadPublishedPredictions(true);
+        }
       } else {
         memberDashboard = null;
+        loadVipDashboard();
         lastPredictionsDate = '';
-        if (currentRubricKey) loadPublishedPredictions(true);
+
+        if (currentRubricKey) {
+          loadPublishedPredictions(true);
+        }
       }
+
       if (document.getElementById('history')?.classList.contains('active')) {
         loadPredictionHistory();
       }
     });
+
     refreshAccountPanel();
+
+    // Charger les coordonnées de paiement dès l'ouverture du site.
+    loadVipDashboard();
+
   } catch (error) {
     console.error('Initialisation compte membre :', error);
-    showFormMessage('loginMessage', 'Le service de compte n’est pas encore configuré. Vérifie la clé publique Supabase dans Netlify.', true);
+
+    showFormMessage(
+      'loginMessage',
+      'Le service de compte n’est pas encore configuré. Vérifie la clé publique Supabase dans Netlify.',
+      true
+    );
   }
 }
 
@@ -639,12 +669,17 @@ function refreshAccountPanel() {
 
 async function signOutMember() {
   if (!supabaseClient) return;
+
   const {error} = await supabaseClient.auth.signOut();
-  if (error) notify('Déconnexion impossible pour le moment.');
-  else {
+
+  if (error) {
+    notify('Déconnexion impossible pour le moment.');
+  } else {
     currentMemberSession = null;
     memberDashboard = null;
     refreshAccountPanel();
+    loadVipDashboard();
+
     notify('Tu es déconnecté.');
     showView('home');
   }
@@ -733,98 +768,68 @@ function renderMemberRequests(data) {
   });
 }
 
-async function loadVipDashboard() {
+  async function loadVipDashboard() {
   const statusBox = document.getElementById('vipStatus');
-  if (!currentMemberSession) {
-    if (statusBox) statusBox.textContent = 'Connecte-toi pour consulter ton statut VIP.';
-    return;
-  }
-  if (statusBox) statusBox.textContent = 'Vérification de ton abonnement...';
+  const instructions = document.getElementById('paymentInstructions');
+
   try {
+    // Les coordonnées de paiement sont chargées pour tous les visiteurs.
     const data = await memberApi('GET');
+
+    const details = data.paymentDetails || {};
+
+    if (instructions) {
+      const wave = details.wave_number
+        ? `Wave : ${details.wave_number}`
+        : 'Wave : numéro à confirmer';
+
+      const orange = details.orange_money_number
+        ? `Orange Money : ${details.orange_money_number}`
+        : 'Orange Money : numéro à confirmer';
+
+      const account = details.account_name
+        ? ` · Nom : ${details.account_name}`
+        : '';
+
+      instructions.textContent =
+        `${wave} · ${orange}${account}. ` +
+        `${details.instructions || 'Après paiement, saisis la référence de transaction. Activation après vérification manuelle.'}`;
+    }
+
+    // Les informations personnelles restent réservées aux membres connectés.
+    if (!currentMemberSession) {
+      memberDashboard = null;
+
+      if (statusBox) {
+        statusBox.textContent =
+          'Connecte-toi pour consulter ton statut VIP et envoyer une demande.';
+      }
+
+      return;
+    }
+
     memberDashboard = data;
+
     if (statusBox) {
       if (data.subscription) {
-        statusBox.innerHTML = `<span class="status-pill active">VIP ACTIF</span> · Expire le ${escapeText(formatDateFr(data.subscription.expires_at))}`;
+        statusBox.innerHTML =
+          `<span class="status-pill active">VIP ACTIF</span> · Expire le ${escapeText(formatDateFr(data.subscription.expires_at))}`;
       } else {
-        statusBox.innerHTML = '<span class="status-pill">AUCUN ABONNEMENT ACTIF</span> · Choisis une formule ci-dessous.';
+        statusBox.innerHTML =
+          '<span class="status-pill">AUCUN ABONNEMENT ACTIF</span> · Choisis une formule ci-dessous.';
       }
     }
-    const details = data.paymentDetails || {};
-    const instructions = document.getElementById('paymentInstructions');
-    if (instructions) {
-      const wave = details.wave_number ? `Wave : ${details.wave_number}` : 'Wave : numéro à confirmer';
-      const orange = details.orange_money_number ? `Orange Money : ${details.orange_money_number}` : 'Orange Money : numéro à confirmer';
-      const account = details.account_name ? ` · Nom : ${details.account_name}` : '';
-      instructions.textContent = `${wave} · ${orange}${account}. ${details.instructions || 'Après paiement, saisis la référence de transaction. Activation après vérification manuelle.'}`;
-    }
+
     renderMemberRequests(data);
+
   } catch (error) {
-    if (statusBox) statusBox.textContent = error.message;
-    const requests = document.getElementById('memberRequests');
-    if (requests) requests.textContent = 'Impossible de charger tes demandes.';
+    console.error('Chargement VIP :', error);
+
+    if (statusBox) {
+      statusBox.textContent =
+        currentMemberSession
+          ? error.message
+          : 'Impossible de charger les coordonnées de paiement pour le moment.';
+    }
   }
 }
-
-document.getElementById('paymentRequestForm')?.addEventListener('submit', async event => {
-  event.preventDefault();
-  if (!currentMemberSession) {
-    showFormMessage('paymentMessage','Connecte-toi avant de soumettre un paiement.',true);
-    showView('account');
-    return;
-  }
-  const body = {
-    action:'payment_request',
-    plan_code:document.getElementById('vipPlan').value,
-    payment_method:document.getElementById('paymentMethod').value,
-    payer_name:document.getElementById('payerName').value.trim(),
-    transaction_reference:document.getElementById('transactionReference').value.trim()
-  };
-  try {
-    const data = await memberApi('POST',body);
-    showFormMessage('paymentMessage',data.message);
-    event.target.reset();
-    await loadVipDashboard();
-  } catch (error) { showFormMessage('paymentMessage',error.message,true); }
-});
-
-document.getElementById('affiliateRequestForm')?.addEventListener('submit', async event => {
-  event.preventDefault();
-  if (!currentMemberSession) {
-    showFormMessage('affiliateMessage','Connecte-toi avant de soumettre ta demande.',true);
-    showView('account');
-    return;
-  }
-  const body = {
-    action:'affiliate_request',
-    partner_code:'NILO3',
-    partner_username:document.getElementById('partnerUsername').value.trim(),
-    deposit_amount:Number(document.getElementById('affiliateDeposit').value),
-    proof_reference:document.getElementById('affiliateProofReference').value.trim()
-  };
-  try {
-    const data = await memberApi('POST',body);
-    showFormMessage('affiliateMessage',data.message);
-    event.target.reset();
-    document.getElementById('affiliateCode').value = 'NILO3';
-    await loadVipDashboard();
-  } catch (error) { showFormMessage('affiliateMessage',error.message,true); }
-});
-
-
-document.getElementById('updatePasswordForm')?.addEventListener('submit', async event => {
-  event.preventDefault();
-  if (!supabaseClient) return showFormMessage('passwordUpdateMessage','Service de compte indisponible.',true);
-  const password = document.getElementById('newMemberPassword').value;
-  if (password.length < 8) return showFormMessage('passwordUpdateMessage','Le mot de passe doit contenir au moins 8 caractères.',true);
-  const {error} = await supabaseClient.auth.updateUser({password});
-  if (error) return showFormMessage('passwordUpdateMessage',error.message,true);
-  showFormMessage('passwordUpdateMessage','Mot de passe modifié avec succès.');
-  document.getElementById('passwordRecoveryPanel').style.display = 'none';
-});
-
-initMemberAuth();
-
-</script>
-</body>
-</html>
